@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 70%;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* Shading for checked checkboxes */
+        .shaded-checkbox {
+            background-color: #d3f2d3; /* Light green shade */
+            border: 1px solid #a1d1a1; /* Lighter green border */
+            padding: 5px;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Event Details</h1>
+        <table>
+            <!-- Days Section -->
+            <tr>
+                <th>Day 1</th>
+                <th>Day 2</th>
+                <th>Day 3</th>
+            </tr>
+            <tr>
+                <td><input type="checkbox" class="{% if event_details.day_1 == 'true' %}shaded-checkbox{% endif %}" {% if event_details.day_1 == 'true' %}checked{% endif %} disabled></td>
+                <td><input type="checkbox" class="{% if event_details.day_2 == 'true' %}shaded-checkbox{% endif %}" {% if event_details.day_2 == 'true' %}checked{% endif %} disabled></td>
+                <td><input type="checkbox" class="{% if event_details.day_3 == 'true' %}shaded-checkbox{% endif %}" {% if event_details.day_3 == 'true' %}checked{% endif %} disabled></td>
+            </tr>
+
+            <!-- Expected Participants -->
+            <tr>
+                <th>Expected Number of Participants</th>
+                <td colspan="2">
+                    {{ event_details.participants | default('N/A') }}
+                </td>
+            </tr>
+
+            <!-- Team Size -->
+            <tr>
+                <th>Team Size (Min-Max)</th>
+                <td colspan="2">
+                    Min: {{ event_details.team_min | default('N/A') }}, Max: {{ event_details.team_max | default('N/A') }}
+                </td>
+            </tr>
+
+            <!-- Halls Section -->
+            <tr>
+                <th>Number of Halls/Labs Required</th>
+                <td colspan="2">
+                    {{ event_details.halls_required | default('N/A') }}
+                </td>
+            </tr>
+            <tr>
+                <th>Halls/Labs Preferred</th>
+                <td colspan="2">
+                    {{ event_details.preferred_halls | default('N/A') }}
+                </td>
+            </tr>
+
+            <!-- Duration Section -->
+            <tr>
+                <th>Duration of the Event</th>
+                <td colspan="2">
+                    Slot 1: 9:30 to 12:30 
+                    <input type="checkbox" {% if event_details.slot == '1' %}checked{% endif %} disabled>
+                    Slot 2: 1:30 to 4:30 
+                    <input type="checkbox" {% if event_details.slot == '2' %}checked{% endif %} disabled>
+                    Full Day 
+                    <input type="checkbox" {% if event_details.slot == 'full_day' %}checked{% endif %} disabled>
+                </td>
+            </tr>
+            
+
+            <!-- Extension Box Section -->
+            <tr>
+                <th>Extension Box</th>
+                <td colspan="2">
+                    {{ event_details.extension_boxes | default('N/A') }}
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+
+</html>

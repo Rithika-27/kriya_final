@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/event.css') }}">
+    <title>Event Details Form</title>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('form');
+            
+            // Load form data from localStorage (if available)
+            const storedData = JSON.parse(localStorage.getItem('eventFormData'));
+            if (storedData) {
+                Object.keys(storedData).forEach(key => {
+                    const element = document.querySelector(`[name="${key}"]`);
+                    if (element) {
+                        if (element.type === 'checkbox' || element.type === 'radio') {
+                            element.checked = storedData[key];
+                        } else {
+                            element.value = storedData[key];
+                        }
+                    }
+                });
+            }
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault(); // Prevent default form submission
+
+                const formData = {};
+                const inputs = document.querySelectorAll('input[name], textarea[name]');
+                inputs.forEach(input => {
+                    formData[input.name] = input.type === 'checkbox' || input.type === 'radio' ? input.checked : input.value;
+                });
+
+                // Store the form data in localStorage under the key 'eventFormData'
+                localStorage.setItem('eventFormData', JSON.stringify(formData));
+
+                // Optionally, redirect after saving data
+                window.location.href = './items'; // Redirect to another page (if needed)
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Event Details Form</h1>
+        <form>
+            <table>
+                <tr>
+                    <th>Day 1</th>
+                    <th>Day 2</th>
+                    <th>Day 3</th>
+                    <th colspan="2">2 Days (Specify)</th>
+                </tr>
+                <tr>
+                    <td><input type="checkbox" name="day_1"></td>
+                    <td><input type="checkbox" name="day_2"></td>
+                    <td><input type="checkbox" name="day_3"></td>
+                    <td colspan="2"><input type="text" name="two_days" placeholder="Enter days"></td>
+                </tr>
+                <!-- Event Type Section -->
+                <tr>
+                    <th colspan="5">Event Type</th>
+                </tr>
+                <tr>
+                    <td colspan="5">
+                        <label>
+                            <input type="checkbox" name="technical_event" /> Technical Event
+                        </label>
+                        <label>
+                            <input type="checkbox" name="non_technical_event" /> Non-Technical Event
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th colspan="5">No. of Rounds</th>
+                </tr>
+                <tr>
+                    <td colspan="5"><input type="number" name="rounds" placeholder="Enter number of rounds"></td>
+                </tr>
+                <tr>
+                    <th colspan="5">Expected No. of Participants</th>
+                </tr>
+                <tr>
+                    <td colspan="5"><input type="number" name="participants" placeholder="Enter number of participants"></td>
+                </tr>
+                <tr>
+                    <th>Event Type</th>
+                    <th>Individual</th>
+                    <th colspan="2">Team (Min-Max)</th>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><input type="checkbox" name="individual"></td>
+                    <td colspan="2">
+                        <div class="min-max-group">
+                            <label><input type="checkbox" name="team"> Team</label>
+                            <label for="team_min">Min:</label>
+                            <input type="number" id="team_min" name="team_min" placeholder="Min" disabled>
+                            <label for="team_max">Max:</label>
+                            <input type="number" id="team_max" name="team_max" placeholder="Max" disabled>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th colspan="5">Number of Halls Required</th>
+                </tr>
+                <tr>
+                    <td colspan="5"><input type="text" name="halls_required" placeholder="Specify halls required"></td>
+                </tr>
+                <tr>
+                    <th colspan="5">Preferred Halls</th>
+                </tr>
+                <tr>
+                    <td colspan="5"><input type="text" name="preferred_halls" placeholder="Specify preferred halls"></td>
+                </tr>
+                <tr>
+                    <th colspan="5">Duration of the Event</th>
+                </tr>
+                <tr>
+                    <td><input type="radio" name="slot" value="slot1"> Slot 1 (9:30 to 12:30)</td>
+                    <td><input type="radio" name="slot" value="slot2"> Slot 2 (1:30 to 4:30)</td>
+                    <td colspan="3"><input type="radio" name="slot" value="full_day"> Full Day</td>
+                </tr>
+                <tr>
+                    <th colspan="5">Extension Box</th>
+                </tr>
+                <tr>
+                    <td colspan="5"><input type="number" name="extension_boxes" placeholder="Enter quantity"></td>
+                </tr>
+                <tr>
+                    <td colspan="5" style="text-align: center;">
+                        <button type="submit">Next</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</body>
+
+</html>
