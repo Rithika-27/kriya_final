@@ -205,7 +205,8 @@ def submit_event():
 # Confirmation Page
 @app.route('/confirm')
 def confirm_page():
-    return render_template('confirm.html')
+    event_id=session.get("event_id")
+    return render_template('confirm.html',event_id=event_id)
 
 @app.route('/view-preview', methods=['GET'])
 def view_preview():
@@ -222,7 +223,12 @@ def view_preview():
         return redirect(url_for('event_page'))
 
     try:
+        html_content_page_1 = render_template('event_start.html')  
+        pdf_output_page = generate_pdf(html_content_page_1)
         # Render the first page
+        html_content_page_1 = render_template('page2.html')  
+        pdf_output_page_0 = generate_pdf(html_content_page_1)
+
         form_data = event_data.get("details", {})
         html_content_page_1 = render_template(
             'event_preview.html',
@@ -258,6 +264,8 @@ def view_preview():
 
         # Combine PDFs
         combined_pdf_output = combine_pdfs(
+            pdf_output_page,
+            pdf_output_page_0,
             pdf_output_page_1,
             pdf_output_page_2,
             pdf_output_page_3
@@ -273,7 +281,7 @@ def view_preview():
         print(f"Error during preview: {e}")
         flash("An error occurred while generating the preview.")
         return redirect(url_for('event_page'))
-    
+
 def generate_pdf(html_content):
     """Generate a PDF from HTML content."""
     pdf_output = BytesIO()
@@ -293,6 +301,7 @@ def combine_pdfs(*pdf_outputs):
     pdf_merger.write(combined_pdf_output)
     combined_pdf_output.seek(0)
     return combined_pdf_output
+
 
 if __name__ == '__main__':
     app.run(debug=True)
