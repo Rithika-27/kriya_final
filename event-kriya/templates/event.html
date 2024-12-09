@@ -10,7 +10,22 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.querySelector('form');
-            
+
+            // Manage enabling/disabling of Min/Max fields
+            const teamCheckbox = document.querySelector('input[name="team"]');
+            const minField = document.querySelector('input[name="team_min"]');
+            const maxField = document.querySelector('input[name="team_max"]');
+
+            // Function to update the disabled state
+            const updateTeamFields = () => {
+                const isTeamChecked = teamCheckbox.checked;
+                minField.disabled = !isTeamChecked;
+                maxField.disabled = !isTeamChecked;
+            };
+
+            // Add event listener for the team checkbox
+            teamCheckbox.addEventListener('change', updateTeamFields);
+
             // Load form data from localStorage (if available)
             const storedData = JSON.parse(localStorage.getItem('eventFormData'));
             if (storedData) {
@@ -24,22 +39,32 @@
                         }
                     }
                 });
+
+                // Update the team fields state on page load
+                updateTeamFields();
             }
 
+            // Save form data to localStorage on submit
             form.addEventListener('submit', (e) => {
                 e.preventDefault(); // Prevent default form submission
 
                 const formData = {};
                 const inputs = document.querySelectorAll('input[name], textarea[name]');
                 inputs.forEach(input => {
-                    formData[input.name] = input.type === 'checkbox' || input.type === 'radio' ? input.checked : input.value;
+                    if (input.type === 'checkbox') {
+                        formData[input.name] = input.checked; // Save checkbox states
+                    } else if (input.type === 'radio') {
+                        // Store radio buttons like slot1, slot2, full_day as true/false
+                        formData[input.value] = input.checked;
+                    } else {
+                        formData[input.name] = input.value; // Save text or number inputs
+                    }
                 });
 
-                // Store the form data in localStorage under the key 'eventFormData'
                 localStorage.setItem('eventFormData', JSON.stringify(formData));
 
-                // Optionally, redirect after saving data
-                window.location.href = './items'; // Redirect to another page (if needed)
+                // Redirect after saving data (optional)
+                window.location.href = './items'; // Redirect to another page
             });
         });
     </script>
@@ -86,7 +111,8 @@
                     <th colspan="5">Expected No. of Participants</th>
                 </tr>
                 <tr>
-                    <td colspan="5"><input type="number" name="participants" placeholder="Enter number of participants"></td>
+                    <td colspan="5"><input type="number" name="participants" placeholder="Enter number of participants">
+                    </td>
                 </tr>
                 <tr>
                     <th>Event Type</th>
@@ -98,7 +124,9 @@
                     <td><input type="checkbox" name="individual"></td>
                     <td colspan="2">
                         <div class="min-max-group">
-                            <label><input type="checkbox" name="team"> Team</label>
+                            <label>
+                                <input type="checkbox" name="team"> Team
+                            </label>
                             <label for="team_min">Min:</label>
                             <input type="number" id="team_min" name="team_min" placeholder="Min" disabled>
                             <label for="team_max">Max:</label>
@@ -116,7 +144,8 @@
                     <th colspan="5">Preferred Halls</th>
                 </tr>
                 <tr>
-                    <td colspan="5"><input type="text" name="preferred_halls" placeholder="Specify preferred halls"></td>
+                    <td colspan="5"><input type="text" name="preferred_halls" placeholder="Specify preferred halls">
+                    </td>
                 </tr>
                 <tr>
                     <th colspan="5">Duration of the Event</th>

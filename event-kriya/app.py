@@ -27,8 +27,22 @@ event_collection = db["event-entries"]
 def home():
     # session.clear()  # Clear all session data for a new event
     return render_template('home.html')
+@app.route('/event-info', methods=['GET', 'POST'])
+def event_info():
+    if request.method == 'POST':
+        # Collect event details and store in session
+        event_details = {
+            'association_name': request.form['association_name'],
+            'event_name': request.form['event_name']
+        }
+        session['event_info'] = event_details
+        return redirect(url_for('event_instructions'))
 
-@app.route('/event-instructions', methods=['GET', 'POST'])
+    return render_template('event_info.html')
+
+    
+
+@app.route('/event_instructions', methods=['GET', 'POST'])
 def event_instructions():
     if request.method == 'POST':
         return redirect(url_for('event_detail'))
@@ -66,6 +80,8 @@ def event_page():
             'day_1': 'day_1' in request.form,
             'day_2': 'day_2' in request.form,
             'day_3': 'day_3' in request.form,
+            'technical_event':'technical_event' in request.form,
+            'non_technical_event':'non_technical_event' in request.form,
             'two_days': request.form.get('two_days'),
             'rounds': request.form.get('rounds'),
             'participants': request.form.get('participants'),
@@ -170,6 +186,8 @@ def submit_event():
         event_data = all_event_data.get('eventData')
         event_items = all_event_data.get('eventItems')  # Correct field name should match
         event_summary = all_event_data.get('eventFormData')
+        association_name=all_event_data.get('association_name')
+        event_name=all_event_data.get('event_name')
 
         # Log the received data to ensure it's correct
         print("Received event details:", event_details)
@@ -192,6 +210,8 @@ def submit_event():
             "event": event_data,
             "items": event_items,
             "form": event_summary,
+            "association_name":association_name,
+            "event_name":event_name
         }
         print("Event Entry to be inserted:", event_entry)
         
@@ -234,16 +254,26 @@ def view_preview():
 
     try:
         # Fetch form data for rendering in event_preview.html
+        association_name=event_datas.get("association_name")
+        event_name=event_datas.get("event_name")
+
         form_data = event_datas.get("details", {})
         event_data = event_datas.get("form", {})
         items = event_datas.get("items", {})
+        event_rounds=event_datas.get("event",{})
 
         # Generate and save multiple pages as PDFs
         pdf_filenames = []
         pdf_filepaths = []
 
         # Page 1
-        html_content_page_1 = render_template('event_start.html')
+        html_content_page_1 = render_template(
+            'event_start.html',
+            event_id=event_id,
+            association_name=association_name,
+            event_name=event_name,
+            event_datas=event_datas
+        )
         pdf_output_page_1 = generate_pdf(html_content_page_1)
         pdf_filename_page_1 = generate_unique_filename("event_page1")
         pdf_filepath_page_1 = os.path.join('static', 'uploads', pdf_filename_page_1)
@@ -295,6 +325,19 @@ def view_preview():
         pdf_filenames.append(pdf_filename_page_5)
         pdf_filepaths.append(pdf_filepath_page_5)
 
+        html_content_page_6 = render_template(
+            'rounds_preview.html',
+            event_id=event_id,
+            event_rounds=event_rounds,
+            event_datas=event_datas
+        )
+        pdf_output_page_6 = generate_pdf(html_content_page_6)
+        pdf_filename_page_6 = generate_unique_filename("event_page6")
+        pdf_filepath_page_6 = os.path.join('static', 'uploads', pdf_filename_page_6)
+        save_pdf(pdf_output_page_6, pdf_filepath_page_6)
+        pdf_filenames.append(pdf_filename_page_6)
+        pdf_filepaths.append(pdf_filepath_page_6)
+
         # Merge the PDFs
         merged_pdf_filename = f"{event_id}_combined.pdf"
         merged_pdf_filepath = os.path.join('static', 'uploads', merged_pdf_filename)
@@ -310,7 +353,7 @@ def view_preview():
         merger.close()
 
         # Provide the merged PDF for download
-        flash(f"PDF successfully created and saved: {merged_pdf_filename}")
+        # flash(f"PDF successfully created and saved: {merged_pdf_filename}")
 
         # Clean up intermediate PDFs (delete them)
         for pdf_path in pdf_filepaths:
@@ -348,97 +391,148 @@ def save_pdf(pdf_output, filepath):
         pdf_file.write(pdf_output)
 
 def generate_and_save_pdf_page4(filepath, event_data):
-    """Generate a custom PDF for page 4 using PdfWriter (programmatically created)."""
-   
-
-    # Create a BytesIO buffer to hold the generated PDF
+    """Generate a custom PDF for page 4 with aligned checkboxes and padding."""
     buffer = BytesIO()
     pdf = canvas.Canvas(buffer, pagesize=letter)
     width, height = letter
 
-    # Set margin for text placement
-    margin = 60  # Left margin
+    # Margins and padding
+    margin = 60
+    padding = 20
     content_width = width - 2 * margin
-    content_height = height - 2 * margin
 
-    # Draw a straightened horizontal line above the Day 1 contents
-    pdf.line(margin - 20, height - 40, width - margin, height - 40)
+    # Top horizontal line
+    pdf.line(margin, height - 40, width - margin, height - 40)
 
-    # Draw checkboxes for days (horizontally aligned)
-    pdf.drawString(margin, height - 60, "Day 1:")
-    pdf.rect(margin + 40, height - 61, 10, 10, fill=1 if "day1" in event_data.get("day", []) else 0)
+    # Vertical lines
+    vertical_line_x = margin + padding
+    pdf.line(margin, height - 40, margin, height - 540)
+    pdf.line(width - margin, height - 40, width - margin, height - 540)
 
-    pdf.drawString(margin + 80, height - 60, "Day 2:")
-    pdf.rect(margin + 130, height - 61, 10, 10, fill=1 if "day2" in event_data.get("day", []) else 0)
+    y_pos = height - 60
 
-    pdf.drawString(margin + 170, height - 60, "Both Days:")
-    pdf.rect(margin + 250, height - 61, 10, 10, fill=1 if "bothDays" in event_data.get("day", []) else 0)
+    # Draw circular checkboxes for days
+    label_x = vertical_line_x + 5
+    checkbox_x = label_x + 100
 
-    # Draw a line after the checkboxes
-    pdf.line(margin - 20, height - 80, width - margin, height - 80)
+    # Ensure alignment and spacing of days
+    pdf.drawString(label_x, y_pos-10, "Day 1:")
+    pdf.circle(checkbox_x-55, y_pos-5 , 5, fill=1 if event_data.get("day_1") else 0)
 
-    # Draw vertical lines from the top horizontal line to the bottom horizontal line
-    pdf.line(margin - 20, height - 40, margin - 20, height - 480)  # Left vertical line
-    pdf.line(width - margin, height - 40, width - margin, height - 480)  # Right vertical line
+    pdf.drawString(label_x + 120, y_pos-10, "Day 2:")
+    pdf.circle(checkbox_x +65, y_pos-5 , 5, fill=1 if event_data.get("day_2") else 0)
 
-    # Draw text fields for event data
-    pdf.drawString(margin, height - 110, f"Expected No. of Participants: {event_data.get('participants', '')}")
-    pdf.drawString(margin, height - 140, f"Team Size: Min: {event_data.get('teamSizeMin', '')}, Max: {event_data.get('teamSizeMax', '')}")
+    pdf.drawString(label_x + 240, y_pos-10, "Day 3:")
+    pdf.circle(checkbox_x + 185, y_pos-6 , 5, fill=1 if event_data.get("day_3") else 0)
 
-    # Draw a line after participants and team size
-    pdf.line(margin - 20, height - 150, width - margin, height - 150)
+    pdf.drawString(label_x + 360, y_pos-10, "Two Days:")
+    pdf.circle(checkbox_x + 328, y_pos-6, 5, fill=1 if event_data.get("two_days") else 0)
 
-    pdf.drawString(margin, height - 170, f"Number of Halls/Labs Required: {event_data.get('hallsRequired', '')}")
-    pdf.drawString(margin, height - 200, "Reason for Multiple Halls:")
-    pdf.drawString(margin + 20, height - 220, event_data.get("hallReason", ""))
+    # Horizontal line
+    y_pos -= 30
+    pdf.line(margin, y_pos, width - margin, y_pos)
 
-    # Draw a line after halls and reasons
-    pdf.line(margin - 20, height - 230, width - margin, height - 230)
+    # Event type
+    y_pos -= 20
+    pdf.drawString(label_x, y_pos-10, "Technical Event:")
+    pdf.circle(checkbox_x, y_pos - 6, 5, fill=1 if event_data.get("technical_event") else 0)
 
-    pdf.drawString(margin, height - 250, "Halls/Labs Preferred:")
-    pdf.drawString(margin + 20, height - 270, event_data.get("hallsPreferred", ""))
+    pdf.drawString(label_x + 180, y_pos-10, "Non-Technical Event:")
+    pdf.circle(checkbox_x + 205, y_pos - 6, 5, fill=1 if event_data.get("non_technical_event") else 0)
 
-    # Draw a line after halls preferred
-    pdf.line(margin - 20, height - 280, width - margin, height - 280)
+    # Horizontal line
+    y_pos -= 30
+    pdf.line(margin, y_pos, width - margin, y_pos)
+    center_x = width / 2  # Calculate the center of the page
+    top_y = y_pos+50   # Y-position of the top horizontal line
+    bottom_y = y_pos   # Y-position of the bottom horizontal line
+    pdf.line(center_x-80, top_y, center_x-80, bottom_y)
+    # Rounds
+    y_pos -= 20
+    pdf.drawString(label_x, y_pos-10, f"Rounds: {event_data.get('rounds', 'N/A')}")
 
-    # Draw radio buttons for duration
-    pdf.drawString(margin, height - 300, "Duration of the Event in Hours:")
-    pdf.drawString(margin + 20, height - 320, "Slot 1: 9:30 to 12:30")
-    pdf.circle(margin + 160, height - 315, 5, fill=1 if event_data.get("duration") == "slot1" else 0)
-    pdf.drawString(margin + 20, height - 340, "Slot 2: 1:30 to 4:30")
-    pdf.circle(margin + 160, height - 335, 5, fill=1 if event_data.get("duration") == "slot2" else 0)
-    pdf.drawString(margin + 20, height - 360, "Full Day")
-    pdf.circle(margin + 160, height - 355, 5, fill=1 if event_data.get("duration") == "fullDay" else 0)
+    # Horizontal line
+    y_pos -= 30
+    pdf.line(margin, y_pos, width - margin, y_pos)
 
-    # Draw a line after the duration radio buttons
-    pdf.line(margin - 20, height - 370, width - margin, height - 370)
+    # Participants
+    y_pos -= 20
+    pdf.drawString(label_x, y_pos-10, f"Participants: {event_data.get('participants', 'N/A')}")
 
-    pdf.drawString(margin, height - 390, f"Number Required: {event_data.get('numberRequired', '')}")
-    pdf.drawString(margin, height - 420, "Reason for Number:")
-    pdf.drawString(margin + 20, height - 440, event_data.get("numberReason", ""))
+    # Horizontal line
+    y_pos -= 30
+    pdf.line(margin, y_pos, width - margin, y_pos)
 
-    # Draw a line after number and reason
-    pdf.line(margin - 20, height - 450, width - margin, height - 450)
+    # Team information
+    y_pos -= 20
+    pdf.drawString(label_x+5, y_pos-7, "Individual:")
+    pdf.circle(checkbox_x-30, y_pos-2, 5, fill=1 if event_data.get("individual") else 0)
 
-    pdf.drawString(margin, height - 470, f"Extension Box: {event_data.get('extensionBox', '')}")
+    pdf.drawString(label_x + 235, y_pos, "Team:")
+    pdf.circle(checkbox_x + 190, y_pos+3 , 5, fill=1 if event_data.get("team") else 0)
 
-    # Draw a line after the extension box
-    pdf.line(margin - 20, height - 480, width - margin, height - 480)
+    y_pos -= 20
+    pdf.drawString(label_x+235, y_pos, f"Min Size: {event_data.get('team_min', 'N/A')}")
+    pdf.drawString(label_x + 235, y_pos-20, f"Max Size: {event_data.get('team_max', 'N/A')}")
 
-    # Draw signature fields
-    pdf.drawString(margin-15, height - 550, f"Signature of the Secretary: ")
-    pdf.drawString(margin-15, height - 580, f"Signature of the Faculty Advisor: ")
+    # Horizontal line
+    y_pos -= 30
+    pdf.line(margin, y_pos, width - margin, y_pos)
+    center_x = width / 2  # Calculate the center of the page
+    top_y = y_pos+70   # Y-position of the top horizontal line
+    bottom_y = y_pos   # Y-position of the bottom horizontal line
+    pdf.line(center_x, top_y, center_x, bottom_y)
+
+    # Halls and slots
+    y_pos -= 20
+    pdf.drawString(label_x, y_pos-4, f"Halls Required: {event_data.get('halls_required', 'N/A')}")
+    y_pos -= 20
+    pdf.drawString(label_x, y_pos-4, f"Preferred Halls: {event_data.get('preferred_halls', 'N/A')}")
+
+    # Horizontal line
+    y_pos -= 30
+    pdf.line(margin, y_pos, width - margin, y_pos)
+
+    # Slots
+    y_pos -= 20
+    pdf.drawString(label_x, y_pos-5, "Slot Details:")
+    y_pos -= 20
+    pdf.drawString(label_x + 20, y_pos-5, "Slot 1: 9:30 to 12:30")
+    pdf.circle(checkbox_x + 40, y_pos - 1, 5, fill=1 if event_data.get("slot1")  else 0)
+
+    y_pos -= 20
+    pdf.drawString(label_x + 20, y_pos-5, "Slot 2: 1:30 to 4:30")
+    pdf.circle(checkbox_x + 40, y_pos - 1, 5, fill=1 if event_data.get("slot2")  else 0)
+
+    y_pos -= 20
+    pdf.drawString(label_x + 20, y_pos-5, "Full Day")
+    pdf.circle(checkbox_x + 40, y_pos - 1, 5, fill=1 if event_data.get("full_day")  else 0)
+
+    # Horizontal line
+    y_pos -= 30
+    pdf.line(margin, y_pos, width - margin, y_pos)
+
+    # Extension boxes
+    y_pos -= 20
+    pdf.drawString(label_x, y_pos-5, f"Extension Boxes: {event_data.get('extension_boxes', 'N/A')}")
+
+    # Horizontal line
+    y_pos -= 30
+    pdf.line(margin, y_pos, width - margin, y_pos)
+
+    # Signature fields
+    y_pos -= 40
+    pdf.drawString(label_x-25, y_pos, "Signature of the Secretary:")
+    y_pos -= 30
+    pdf.drawString(label_x-25, y_pos, "Signature of the Faculty Advisor:")
 
     # Save the generated PDF
     pdf.save()
 
-    # Move buffer back to the beginning and return it
-    buffer.seek(0)
-
     # Write the PDF to the specified filepath
+    buffer.seek(0)
     with open(filepath, "wb") as f:
         f.write(buffer.read())
-
 if __name__ == '__main__':
     app.run(debug=True)
 

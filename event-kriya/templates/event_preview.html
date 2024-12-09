@@ -8,52 +8,84 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 0;
-            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+            background-color: #ffffff;
+            line-height: 1.6;
         }
 
         h1 {
             text-align: center;
             color: #333;
+            font-size: 24px;
+            margin-bottom: 30px;
         }
 
         .section {
             margin-bottom: 30px;
         }
 
-        .table,
-        .table th,
-        .table td {
-            border: 1px solid #ddd;
-            border-collapse: collapse;
-            width: 100%;
-            margin: 10px 0;
-        }
-
-        .table th,
-        .table td {
-            padding: 8px;
-            text-align: left;
-        }
-
-        .table th {
-            background-color: #f2f2f2;
-        }
-
         h2 {
             color: #333;
+            font-size: 20px;
             margin-bottom: 10px;
         }
 
         table {
             width: 100%;
-            margin-top: 10px;
+            max-width: 800px;
+            /* Set a max-width to prevent it from being too large */
+            margin: 20px auto;
+            /* Center the table */
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            /* Add subtle shadow for depth */
+        }
+
+        th,
+        td {
+            border: 1px solid #ffffff;
+            padding: 12px 15px;
+            /* Increase padding for better readability */
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        td {
+            background-color: #fafafa;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 900px;
             margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Optional: Add responsive design adjustments */
+        @media (max-width: 768px) {
+            table {
+                width: 100%;
+                margin: 20px 0;
+            }
+
+            th,
+            td {
+                padding: 8px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            h2 {
+                font-size: 18px;
+            }
         }
     </style>
 </head>
@@ -64,7 +96,7 @@
 
         <div class="section">
             <h2>Secretary Details</h2>
-            <table class="table">
+            <table>
                 <tr>
                     <th>Name</th>
                     <th>Roll Number</th>
@@ -79,8 +111,8 @@
         </div>
 
         <div class="section">
-            <h2>Convenor and Volunteer Details</h2>
-            <table class="table">
+            <h2>Convenor Details</h2>
+            <table>
                 <tr>
                     <th>Name</th>
                     <th>Roll Number</th>
@@ -103,7 +135,7 @@
 
         <div class="section">
             <h2>Faculty Advisor Details</h2>
-            <table class="table">
+            <table>
                 <tr>
                     <th>Name</th>
                     <th>Designation</th>
@@ -119,7 +151,7 @@
 
         <div class="section">
             <h2>Judge Details</h2>
-            <table class="table">
+            <table>
                 <tr>
                     <th>Name</th>
                     <th>Designation</th>

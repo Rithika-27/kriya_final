@@ -9,11 +9,23 @@
     <script>
         // Function to load the event data from localStorage and display it
         function loadPreviewData() {
-            // Retrieve event details, event data, items, and event summary from localStorage
+            // Retrieve event details, event data, items, event summary, association_name, and event_name
             const eventDetails = JSON.parse(localStorage.getItem('eventDetails'));
             const eventData = JSON.parse(localStorage.getItem('eventData'));
             const eventItems = JSON.parse(localStorage.getItem('items'));
             const eventFormData = JSON.parse(localStorage.getItem('eventFormData'));
+            const associationName = localStorage.getItem('association_name');
+            const eventName = localStorage.getItem('event_name');
+
+            // Display association_name and event_name
+            const associationContainer = document.getElementById('associationName');
+            const eventNameContainer = document.getElementById('eventName');
+            associationContainer.innerHTML = associationName
+                ? `<h2>Association Name:</h2><p>${associationName}</p>`
+                : '<p>No association name found.</p>';
+            eventNameContainer.innerHTML = eventName
+                ? `<h2>Event Name:</h2><p>${eventName}</p>`
+                : '<p>No event name found.</p>';
 
             // Check and display event details
             if (eventDetails) {
@@ -155,9 +167,18 @@
             const eventData = JSON.parse(localStorage.getItem('eventData'));
             const eventItems = JSON.parse(localStorage.getItem('items'));
             const eventFormData = JSON.parse(localStorage.getItem('eventFormData'));
+            const association_name = localStorage.getItem('association_name');
+            const event_name = localStorage.getItem('event_name');
 
-            if (eventDetails && eventData && eventItems && eventFormData) {
-                const allEventData = { eventDetails, eventData, eventItems, eventFormData };
+            if (eventDetails && eventData && eventItems && eventFormData && association_name && event_name) {
+                const allEventData = {
+                    association_name,
+                    event_name,
+                    eventDetails,
+                    eventData,
+                    eventItems,
+                    eventFormData
+                };
 
                 // Simulate submitting the data (sending it to the backend)
                 fetch('/submit_event', {
@@ -187,6 +208,12 @@
 <body>
     <div class="container">
         <h1>Event Preview</h1>
+
+        <!-- Association Name -->
+        <div id="associationName"></div>
+
+        <!-- Event Name -->
+        <div id="eventName"></div>
 
         <!-- Event Details Section -->
         <div id="eventDetails"></div>
