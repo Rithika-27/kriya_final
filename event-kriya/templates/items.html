@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
 
     <title>Items Required for Event</title>
 </head>
+
 <body>
     <h1>Items Required for Event</h1>
     <form id="itemsForm">
@@ -26,13 +28,8 @@
             </tbody>
         </table>
         <button type="button" id="addRowButton">Add Row</button>
-        <button type="submit">Save to LocalStorage</button>
+        <button type="submit">Next</button>
     </form>
-
-    <div class="links">
-        <a href="/event-form.html">Back to Event Form</a>
-        <a href="/">Home</a>
-    </div>
 
     <script>
         const itemsTable = document.getElementById("itemsTable").querySelector("tbody");
@@ -87,7 +84,7 @@
         document.getElementById("addRowButton").addEventListener("click", addRow);
 
         // Load saved items from localStorage on page load
-        window.onload = function() {
+        window.onload = function () {
             const savedItems = JSON.parse(localStorage.getItem("items"));
             if (savedItems && Array.isArray(savedItems)) {
                 savedItems.forEach(item => {
@@ -129,11 +126,12 @@
             localStorage.setItem("items", JSON.stringify(items));
             alert("Items saved to localStorage successfully!");
 
-            
-            window.location.href = './event-summary';  // Redirect to the summary page
-            
-            
+
+            window.location.href = './event_summary';  // Redirect to the summary page
+
+
         });
     </script>
 </body>
+
 </html>

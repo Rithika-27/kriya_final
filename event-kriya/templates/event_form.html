@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Details</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/event_form.css') }}">
 </head>
+
 <body>
     <h1>Enter Event Details</h1>
     <form id="event-form">
@@ -32,7 +34,7 @@
 
     <script>
         // Add dynamic fields based on round count
-        document.getElementById('round_count').addEventListener('input', function() {
+        document.getElementById('round_count').addEventListener('input', function () {
             const roundsContainer = document.getElementById('rounds');
             roundsContainer.innerHTML = ''; // Clear previous fields
             const roundCount = parseInt(this.value);
@@ -53,7 +55,7 @@
         });
 
         // Handle form submission
-        document.getElementById('event-form').addEventListener('submit', function(e) {
+        document.getElementById('event-form').addEventListener('submit', function (e) {
             e.preventDefault(); // Prevent form submission
 
             // Gather event data
@@ -78,14 +80,14 @@
             localStorage.setItem('eventData', JSON.stringify(eventData));
 
             // Display success message
-            alert("Event details saved successfully in local storage!");
+            // alert("Event details saved successfully in local storage!");
 
             // Redirect to event_data.html
             window.location.href = './preview';
         });
 
         // Load saved data on page load
-        window.onload = function() {
+        window.onload = function () {
             const storedEventData = localStorage.getItem('eventData');
             if (storedEventData) {
                 const eventData = JSON.parse(storedEventData);
@@ -114,4 +116,5 @@
         };
     </script>
 </body>
+
 </html>

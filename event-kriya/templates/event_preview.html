@@ -123,15 +123,30 @@
                     <td>{{ form_data.convenor_roll_number }}</td>
                     <td>{{ form_data.convenor_mobile }}</td>
                 </tr>
-                {% for volunteer in form_data.volunteers %}
-                <tr>
-                    <td>{{ volunteer.name }}</td>
-                    <td>{{ volunteer.roll_number }}</td>
-                    <td>{{ volunteer.mobile }}</td>
-                </tr>
-                {% endfor %}
+
+
+
             </table>
         </div>
+        <div class="section">
+            <h2>Volunteer Details</h2>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Roll Number</th>
+                    <th>Mobile No</th>
+                </tr>
+
+
+                <tr>
+                    <td>{{ form_data.volunteer}}</td>
+                    <td>{{ form_data.volunteer_roll_number }}</td>
+                    <td>{{ form_data.volunteer_mobile }}</td>
+                </tr>
+
+            </table>
+        </div>
+
 
         <div class="section">
             <h2>Faculty Advisor Details</h2>

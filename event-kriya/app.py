@@ -133,7 +133,7 @@ def items_page():
     return render_template('items.html', event_items=session['event_items'])
 
 # Event Summary Form
-@app.route('/event-summary', methods=['GET', 'POST'])
+@app.route('/event_summary', methods=['GET', 'POST'])
 def event_summary():
     if request.method == 'POST':
         event_name = request.form.get('name')

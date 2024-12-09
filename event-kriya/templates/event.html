@@ -10,27 +10,85 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.querySelector('form');
-
-            // Manage enabling/disabling of Min/Max fields
-            const teamCheckbox = document.querySelector('input[name="team"]');
+            const numericInputs = document.querySelectorAll('input[type="number"]');
+            const teamRadio = document.querySelector('input[value="team"]');
             const minField = document.querySelector('input[name="team_min"]');
             const maxField = document.querySelector('input[name="team_max"]');
+            const twoDaysRadio = document.querySelector('input[value="two_days"]');
+            const twoDaysField = document.querySelector('input[name="two_days"]');
+            const hallsField = document.querySelector('input[name="halls_required"]');
+            const hallsReasonField = document.querySelector('input[name="hall_reason"]');
+            const preferredHallsField = document.querySelector('input[name="preferred_halls"]');
+            const preferredHallsReasonField = document.querySelector('input[name="preferred_hall_reason"]');
 
-            // Function to update the disabled state
+            // Enable/disable team min/max fields
             const updateTeamFields = () => {
-                const isTeamChecked = teamCheckbox.checked;
-                minField.disabled = !isTeamChecked;
-                maxField.disabled = !isTeamChecked;
+                const isTeamSelected = teamRadio.checked;
+                minField.disabled = !isTeamSelected;
+                maxField.disabled = !isTeamSelected;
             };
 
-            // Add event listener for the team checkbox
-            teamCheckbox.addEventListener('change', updateTeamFields);
+            teamRadio.addEventListener('change', updateTeamFields);
 
-            // Load form data from localStorage (if available)
+            // Enable/disable "2 Days" input field
+            const updateTwoDaysField = () => {
+                twoDaysField.disabled = !twoDaysRadio.checked;
+            };
+
+            twoDaysRadio.addEventListener('change', updateTwoDaysField);
+
+            // Enable/disable reason fields for halls and preferred halls
+            const updateReasonFields = () => {
+                hallsReasonField.disabled = !(hallsField.value > 1);
+                preferredHallsReasonField.disabled = !(preferredHallsField.value > 1);
+            };
+
+            hallsField.addEventListener('input', updateReasonFields);
+            preferredHallsField.addEventListener('input', updateReasonFields);
+
+            // Prevent negative numbers in numeric inputs
+            numericInputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    if (input.value < 0) {
+                        input.value = '';
+                        alert('Negative values are not allowed.');
+                    }
+                });
+            });
+
+            // Form submission handler
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                // Validate team size if team is selected
+                if (teamRadio.checked && (minField.value.trim() === '' || maxField.value.trim() === '')) {
+                    alert('Please specify the minimum and maximum team size.');
+                    return;
+                }
+
+                // Save data
+                const formData = {};
+                const inputs = document.querySelectorAll('input[name]');
+                inputs.forEach(input => {
+                    if (input.type === 'radio') {
+                        if (input.checked) formData[input.name] = input.value;
+                    } else if (input.type === 'checkbox') {
+                        formData[input.name] = input.checked;
+                    } else {
+                        formData[input.name] = input.value.trim();
+                    }
+                });
+
+                localStorage.setItem('eventFormData', JSON.stringify(formData));
+                alert('Form submitted successfully!');
+                window.location.href = './items';
+            });
+
+            // Load saved data from localStorage
             const storedData = JSON.parse(localStorage.getItem('eventFormData'));
             if (storedData) {
                 Object.keys(storedData).forEach(key => {
-                    const element = document.querySelector(`[name="${key}"]`);
+                    const element = document.querySelector([name = "${key}"]);
                     if (element) {
                         if (element.type === 'checkbox' || element.type === 'radio') {
                             element.checked = storedData[key];
@@ -40,32 +98,10 @@
                     }
                 });
 
-                // Update the team fields state on page load
                 updateTeamFields();
+                updateTwoDaysField();
+                updateReasonFields();
             }
-
-            // Save form data to localStorage on submit
-            form.addEventListener('submit', (e) => {
-                e.preventDefault(); // Prevent default form submission
-
-                const formData = {};
-                const inputs = document.querySelectorAll('input[name], textarea[name]');
-                inputs.forEach(input => {
-                    if (input.type === 'checkbox') {
-                        formData[input.name] = input.checked; // Save checkbox states
-                    } else if (input.type === 'radio') {
-                        // Store radio buttons like slot1, slot2, full_day as true/false
-                        formData[input.value] = input.checked;
-                    } else {
-                        formData[input.name] = input.value; // Save text or number inputs
-                    }
-                });
-
-                localStorage.setItem('eventFormData', JSON.stringify(formData));
-
-                // Redirect after saving data (optional)
-                window.location.href = './items'; // Redirect to another page
-            });
         });
     </script>
 </head>
@@ -75,6 +111,7 @@
         <h1>Event Details Form</h1>
         <form>
             <table>
+                <!-- Day Selection -->
                 <tr>
                     <th>Day 1</th>
                     <th>Day 2</th>
@@ -82,38 +119,49 @@
                     <th colspan="2">2 Days (Specify)</th>
                 </tr>
                 <tr>
-                    <td><input type="checkbox" name="day_1"></td>
-                    <td><input type="checkbox" name="day_2"></td>
-                    <td><input type="checkbox" name="day_3"></td>
-                    <td colspan="2"><input type="text" name="two_days" placeholder="Enter days"></td>
+                    <td><input type="radio" name="day" value="day_1"></td>
+                    <td><input type="radio" name="day" value="day_2"></td>
+                    <td><input type="radio" name="day" value="day_3"></td>
+                    <td><input type="radio" name="day" value="two_days"></td>
+                    <td><input type="text" name="two_days" placeholder="Enter days (e.g., Day 1, Day 2)" disabled></td>
                 </tr>
-                <!-- Event Type Section -->
+
+                <!-- Event Type -->
                 <tr>
                     <th colspan="5">Event Type</th>
                 </tr>
                 <tr>
                     <td colspan="5">
-                        <label>
-                            <input type="checkbox" name="technical_event" /> Technical Event
-                        </label>
-                        <label>
-                            <input type="checkbox" name="non_technical_event" /> Non-Technical Event
-                        </label>
+                        <label><input type="radio" name="event_type" value="technical"> Technical Event</label>
+                        <label><input type="radio" name="event_type" value="non_technical"> Non-Technical Event</label>
                     </td>
                 </tr>
+
+                <!-- Rounds and Participants -->
                 <tr>
                     <th colspan="5">No. of Rounds</th>
                 </tr>
                 <tr>
-                    <td colspan="5"><input type="number" name="rounds" placeholder="Enter number of rounds"></td>
+                    <td colspan="5"><input type="number" name="rounds" placeholder="Enter number of rounds" min="1">
+                    </td>
                 </tr>
                 <tr>
                     <th colspan="5">Expected No. of Participants</th>
                 </tr>
                 <tr>
-                    <td colspan="5"><input type="number" name="participants" placeholder="Enter number of participants">
-                    </td>
+                    <td colspan="5"><input type="number" name="participants" placeholder="Enter number of participants"
+                            min="1"></td>
                 </tr>
+
+                <!-- Event Duration -->
+                <tr>
+                    <th colspan="5">Duration of the Event</th>
+                </tr>
+                <tr>
+                    <td colspan="5"><input type="text" name="duration" placeholder="Specify duration"></td>
+                </tr>
+
+                <!-- Participant Type -->
                 <tr>
                     <th>Event Type</th>
                     <th>Individual</th>
@@ -121,50 +169,63 @@
                 </tr>
                 <tr>
                     <td></td>
-                    <td><input type="checkbox" name="individual"></td>
+                    <td><input type="radio" name="participant_type" value="individual"></td>
                     <td colspan="2">
-                        <div class="min-max-group">
-                            <label>
-                                <input type="checkbox" name="team"> Team
-                            </label>
-                            <label for="team_min">Min:</label>
-                            <input type="number" id="team_min" name="team_min" placeholder="Min" disabled>
-                            <label for="team_max">Max:</label>
-                            <input type="number" id="team_max" name="team_max" placeholder="Max" disabled>
-                        </div>
+                        <label><input type="radio" name="participant_type" value="team"> Team</label>
+                        <label>Min: <input type="number" name="team_min" placeholder="Min" disabled></label>
+                        <label>Max: <input type="number" name="team_max" placeholder="Max" disabled></label>
                     </td>
                 </tr>
+
+                <!-- Halls -->
                 <tr>
-                    <th colspan="5">Number of Halls Required</th>
+                    <th>Halls Required</th>
+                    <th colspan="4"><input type="number" name="halls_required" placeholder="Specify halls required">
+                    </th>
                 </tr>
                 <tr>
-                    <td colspan="5"><input type="text" name="halls_required" placeholder="Specify halls required"></td>
+                    <th>Reason for Halls</th>
+                    <th colspan="4"><input type="text" name="hall_reason" placeholder="Specify reason for halls"
+                            disabled></textarea></th>
                 </tr>
                 <tr>
-                    <th colspan="5">Preferred Halls</th>
+                    <th>Preferred Halls</th>
+                    <th colspan="4"><input type="number" name="preferred_halls" placeholder="Specify preferred halls">
+                    </th>
                 </tr>
                 <tr>
-                    <td colspan="5"><input type="text" name="preferred_halls" placeholder="Specify preferred halls">
-                    </td>
+                    <th>Reason for Preferred Halls</th>
+                    <th colspan="4"><input type="text" name="preferred_hall_reason"
+                            placeholder="Specify reason for preferred halls" disabled></textarea></th>
                 </tr>
+
+                <!-- Slot -->
                 <tr>
-                    <th colspan="5">Duration of the Event</th>
+                    <th colspan="5">Slot</th>
                 </tr>
                 <tr>
                     <td><input type="radio" name="slot" value="slot1"> Slot 1 (9:30 to 12:30)</td>
                     <td><input type="radio" name="slot" value="slot2"> Slot 2 (1:30 to 4:30)</td>
                     <td colspan="3"><input type="radio" name="slot" value="full_day"> Full Day</td>
                 </tr>
+
+                <!-- Extension Boxes -->
                 <tr>
                     <th colspan="5">Extension Box</th>
                 </tr>
                 <tr>
-                    <td colspan="5"><input type="number" name="extension_boxes" placeholder="Enter quantity"></td>
+                    <td colspan="5"><input type="number" name="extension_boxes" placeholder="Enter number of boxes">
+                    </td>
                 </tr>
                 <tr>
-                    <td colspan="5" style="text-align: center;">
-                        <button type="submit">Next</button>
-                    </td>
+                    <th>Reason for Extension Boxes</th>
+                    <th colspan="4"><input type="text" name="extension_reason"
+                            placeholder="Specify reason for extension boxes"></textarea></th>
+                </tr>
+
+                <!-- Submit Button -->
+                <tr>
+                    <td colspan="5"><button type="submit">Save Event Details</button></td>
                 </tr>
             </table>
         </form>

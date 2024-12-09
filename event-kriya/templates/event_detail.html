@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/event_details.css') }}">
-
     <title>Event Details Page</title>
     <script>
         // Function to save event details in localStorage
@@ -30,6 +29,22 @@
             // Navigate to the next page (event.html)
             window.location.href = './event';
         }
+        window.onload = function () {
+            const storedEventDetails = localStorage.getItem("eventDetails");
+
+            if (storedEventDetails) {
+                const eventDetails = JSON.parse(storedEventDetails);
+
+                // Populate all input fields
+                const form = document.getElementById("eventDetailsForm");
+                for (const [key, value] of Object.entries(eventDetails)) {
+                    const input = form.querySelector([name = "${key}"]);
+                    if (input) {
+                        input.value = value;
+                    }
+                }
+            }
+        };
     </script>
 </head>
 
@@ -41,16 +56,30 @@
             <h3>Secretary Details:</h3>
             <table>
                 <tr>
-                    <th>Name</th>
-                    <td><input type="text" name="secretary_name" required></td>
+                    <th>Name (Secretary 1)</th>
+                    <td><input type="text" name="secretary1_name" required></td>
                 </tr>
                 <tr>
                     <th>Roll Number</th>
-                    <td><input type="text" name="secretary_roll_number" required></td>
+                    <td><input type="text" name="secretary1_roll_number" required></td>
                 </tr>
                 <tr>
                     <th>Mobile No</th>
-                    <td><input type="text" name="secretary_mobile" required></td>
+                    <td><input type="text" name="secretary1_mobile" pattern="\d{10}"
+                            title="Please enter a 10-digit mobile number." required></td>
+                </tr>
+                <tr>
+                    <th>Name (Secretary 2)</th>
+                    <td><input type="text" name="secretary2_name" required></td>
+                </tr>
+                <tr>
+                    <th>Roll Number</th>
+                    <td><input type="text" name="secretary2_roll_number" required></td>
+                </tr>
+                <tr>
+                    <th>Mobile No</th>
+                    <td><input type="text" name="secretary2_mobile" pattern="\d{10}"
+                            title="Please enter a 10-digit mobile number." required></td>
                 </tr>
             </table>
 
@@ -58,32 +87,62 @@
             <h3>Convenor Details:</h3>
             <table>
                 <tr>
-                    <th>Name</th>
-                    <td><input type="text" name="convenor_name" required></td>
+                    <th>Name (Convenor 1)</th>
+                    <td><input type="text" name="convenor1_name" required></td>
                 </tr>
                 <tr>
                     <th>Roll Number</th>
-                    <td><input type="text" name="convenor_roll_number" required></td>
+                    <td><input type="text" name="convenor1_roll_number" required></td>
                 </tr>
                 <tr>
                     <th>Mobile No</th>
-                    <td><input type="text" name="convenor_mobile" required></td>
+                    <td><input type="text" name="convenor1_mobile" pattern="\d{10}"
+                            title="Please enter a 10-digit mobile number." required>
+                    </td>></td>
+                </tr>
+                <tr>
+                    <th>Name (Convenor 2)</th>
+                    <td><input type="text" name="convenor2_name" required></td>
+                </tr>
+                <tr>
+                    <th>Roll Number</th>
+                    <td><input type="text" name="convenor2_roll_number" required></td>
+                </tr>
+                <tr>
+                    <th>Mobile No</th>
+                    <td><input type="text" name="convenor2_mobile" pattern="\d{10}"
+                            title="Please enter a 10-digit mobile number." required></td>
                 </tr>
             </table>
 
+            <!-- Volunteer Details -->
             <h3>Volunteer Details:</h3>
             <table>
                 <tr>
-                    <th>Name</th>
-                    <td><input type="text" name="volunteer" required></td>
+                    <th>Name (Volunteer 1)</th>
+                    <td><input type="text" name="volunteer1_name" required></td>
                 </tr>
                 <tr>
                     <th>Roll Number</th>
-                    <td><input type="text" name="volunteer_roll_number" required></td>
+                    <td><input type="text" name="volunteer1_roll_number" required></td>
                 </tr>
                 <tr>
                     <th>Mobile No</th>
-                    <td><input type="text" name="volunteer_mobile" required></td>
+                    <td><input type="text" name="volunteer1_mobile" pattern="\d{10}"
+                            title="Please enter a 10-digit mobile number." required></td>
+                </tr>
+                <tr>
+                    <th>Name (Volunteer 2)</th>
+                    <td><input type="text" name="volunteer2_name" required></td>
+                </tr>
+                <tr>
+                    <th>Roll Number</th>
+                    <td><input type="text" name="volunteer2_roll_number" required></td>
+                </tr>
+                <tr>
+                    <th>Mobile No</th>
+                    <td><input type="text" name="volunteer2_mobile" pattern="\d{10}"
+                            title="Please enter a 10-digit mobile number." required></td>
                 </tr>
             </table>
 
@@ -100,7 +159,8 @@
                 </tr>
                 <tr>
                     <th>Contact Details</th>
-                    <td><input type="text" name="faculty_advisor_contact" required></td>
+                    <td><input type="text" name="faculty_advisor_contact" pattern="\d{10}"
+                            title="Please enter a 10-digit mobile number." required></td>
                 </tr>
             </table>
 
@@ -117,7 +177,8 @@
                 </tr>
                 <tr>
                     <th>Contact Details</th>
-                    <td><input type="text" name="judge_contact" required></td>
+                    <td><input type="text" name="judge_contact" pattern="\d{10}"
+                            title="Please enter a 10-digit mobile number." required></td>
                 </tr>
             </table>
 

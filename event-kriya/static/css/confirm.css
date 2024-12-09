@@ -1,7 +1,8 @@
 /* General Body Styling */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4; /* Light yellow background */
+    background-color: #f4f4f4;
+    /* Light yellow background */
     margin: 0;
     padding: 0;
     display: flex;
@@ -25,7 +26,8 @@ body {
 
 /* Header Styling */
 h1 {
-    color: #333; /* Bright yellow for success */
+    color: #333;
+    /* Bright yellow for success */
     font-size: 24px;
     margin-bottom: 20px;
 }
@@ -39,7 +41,8 @@ h1 {
 
 /* Event ID Styling */
 .event-id {
-    color: #333; /* Matching yellow */
+    color: #333;
+    /* Matching yellow */
     font-weight: bold;
     font-size: 20px;
     margin-bottom: 20px;
@@ -48,7 +51,8 @@ h1 {
 /* Button Styling */
 .button {
     display: inline-block;
-    background-color: #f9a825; /* Yellow button */
+    background-color: #f9a825;
+    /* Yellow button */
     color: white;
     padding: 12px 24px;
     font-size: 16px;
@@ -58,9 +62,11 @@ h1 {
 }
 
 .button:hover {
-    background-color: #f7c600; /* Darker yellow on hover */
+    background-color: #f7c600;
+    /* Darker yellow on hover */
 }
 
 .button:active {
-    background-color: #f57f17; /* Darker yellow when clicked */
+    background-color: #f57f17;
+    /* Darker yellow when clicked */
 }
