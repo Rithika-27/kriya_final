@@ -21,6 +21,7 @@ MONGO_URI = "mongodb+srv://Entries:ewp2025@cluster0.1tuj7.mongodb.net/event-kriy
 client = MongoClient(MONGO_URI)
 db = client["event-kriya"]
 event_collection = db["event-entries"]
+workshop_collection=db["workshop-entries"]
 
 # Main route for home
 @app.route('/')
@@ -533,6 +534,212 @@ def generate_and_save_pdf_page4(filepath, event_data):
     buffer.seek(0)
     with open(filepath, "wb") as f:
         f.write(buffer.read())
+
+@app.route('/workshop-info', methods=['GET', 'POST'])
+def workshop_info():
+    if request.method == 'POST':
+        # Collect event details and store in session
+        workshop_details = {
+            'association_name': request.form['association_name'],
+            'workshop_name': request.form['workshop_name']
+        }
+        session['workshop_info'] = workshop_details
+        return redirect(url_for('workshop_instruction'))
+
+    return render_template('workshop_info.html')
+@app.route('/workshop_instruction', methods=['GET', 'POST'])
+def workshop_instruction():
+    if request.method == 'POST':
+        return redirect(url_for('workshop_detail'))
+    return render_template('workshop_instruction.html')
+@app.route('/workshop-detail', methods=['GET', 'POST'])
+def workshop_detail():
+    if request.method == 'POST':
+        # Collect event details and store in session
+        workshop_details = {
+            'secretary_name': request.form['secretary_name'],
+            'secretary_roll_number': request.form['secretary_roll_number'],
+            'secretary_mobile': request.form['secretary_mobile'],
+            'convenor_name': request.form['convenor_name'],
+            'convenor_roll_number': request.form['convenor_roll_number'],
+            'convenor_mobile': request.form['convenor_mobile'],
+            'faculty_advisor_name': request.form['faculty_advisor_name'],
+            'faculty_advisor_designation': request.form['faculty_advisor_designation'],
+            'faculty_advisor_contact': request.form['faculty_advisor_contact'],
+            'speaker_name': request.form['speaker_name'],
+            'speaker_designation': request.form['speaker_designation'],
+            'speaker_contact': request.form['speaker_contact']
+        }
+        session['workshop_details'] =workshop_details
+        return redirect(url_for('workshop_page'))
+    return render_template('workshop_detail.html')
+
+@app.route('/workshop', methods=['GET', 'POST'])
+def workshop_page():
+    if request.method == 'POST':
+        # Collect event data and store in session
+        workshop_data = {
+            'day_2': 'day_1' in request.form,
+            'day_3': 'day_2' in request.form,
+            'both_days': 'both_days' in request.form,
+            'participants': request.form.get('participants'),
+            'halls_required': request.form.get('halls_required'),
+            'preferred_halls': request.form.get('preferred_halls'),
+            'slot': request.form.get('slot'),
+            'extension_boxes': request.form.get('extension_boxes'),
+        }
+        session['workshop_data'] = workshop_data
+        return redirect(url_for('items_ws'))
+    return render_template('workshop.html')
+@app.route('/items_ws', methods=['GET', 'POST'])
+def items_ws():
+    
+    if 'workshop_items' not in session:
+        session['workshop_items'] = []
+
+    if request.method == 'POST':
+        # Collect item data from the form and store it in the session
+        try:
+            items_data = {
+                "sno": request.form.get("sno"),
+                "item_name": request.form.get("item_name"),
+                "quantity": int(request.form.get("quantity")),
+                "price_per_unit": float(request.form.get("price_per_unit")),
+                "total_price": int(request.form.get("quantity")) * float(request.form.get("price_per_unit"))
+            }
+
+            # Validate required fields
+            if not items_data["item_name"] or not items_data["quantity"]:
+                flash("Item name and quantity are required.")
+                return redirect(url_for('items_ws'))
+
+            # Append item to session
+            session['workshop_items'].append(items_data)
+            flash("Item added successfully!")
+            return redirect(url_for('workshop_summary'))
+        except ValueError:
+            flash("Please enter valid numeric values for quantity and price.")
+            return redirect(url_for('items_ws'))
+
+    return render_template('items_ws.html', workshop_items=session['workshop_items'])
+@app.route('/workshop_summary', methods=['GET', 'POST'])
+def workshop_summary():
+    if request.method == 'POST':
+        # Collect workshop general information
+        workshop_name = request.form.get('workshop_name')
+        description = request.form.get('workshop_description')
+        prerequisites = request.form.get('workshop_prerequisites')
+        
+        # Initialize sessions list
+        sessions = []
+
+        # Get the number of sessions (from the input field in the HTML)
+        session_count = int(request.form.get('session_count', 0))
+
+        # Collect session details (session number, time, topic, and description)
+        for i in range(session_count):
+            sessions.append({
+                "session_no": request.form.get(f'session_no_{i}'),
+                "session_time": request.form.get(f'session_time_{i}'),
+                "session_topic": request.form.get(f'session_topic_{i}'),
+                "session_description": request.form.get(f'session_description_{i}')
+            })
+
+        # Store the workshop data in the session or database (depending on how you want to save it)
+        session['workshop_summary'] = {
+            "workshop_name": workshop_name,
+            "description": description,
+            "prerequisites": prerequisites,
+            "sessions": sessions
+        }
+
+        # Redirect to the preview page (assuming a route named 'preview' exists)
+        return redirect(url_for('preview_ws'))
+
+    # If the method is GET, render the workshop form template
+    return render_template('workshop_form.html')
+@app.route('/preview_ws', methods=['GET'])
+def preview_ws():
+    try:
+        # Retrieve workshop details, workshop data, workshop items, and workshop form data from session
+        workshop_details = session.get('workshop_details', {})
+        workshop_data = session.get('workshop_data', {})
+        workshop_items = session.get('workshop_items', [])
+        workshop_form_data = session.get('workshop_form_data', {})
+        # if not workshop_items:
+        #     flash("No items found.")
+        # return redirect(url_for('items_ws_page')) 
+
+        # Pass all the data to the template
+        return render_template('preview_ws.html', 
+                               workshop_details=workshop_details, 
+                               workshop_data=workshop_data,
+                               workshop_items=workshop_items,
+                               workshop_form_data=workshop_form_data)
+    except Exception:
+        return jsonify({"status": "error", "message": "Error retrieving preview data"}), 500
+@app.route('/submit_ws_event', methods=['POST'])
+def submit_ws_event():
+    try:
+        # Get the request JSON data
+        all_workshop_data = request.get_json()  # Correct method to get JSON data
+        workshop_details = all_workshop_data.get('workshopDetails')
+        workshop_data = all_workshop_data.get('workshopData')
+        workshop_items = all_workshop_data.get('workshopItems')  # Correct field name should match
+        workshop_summary = all_workshop_data.get('workshopFormData')
+        association_name=all_workshop_data.get('association_name')
+        workshop_name=all_workshop_data.get('workshop_name')
+
+        # Log the received data to ensure it's correct
+        print("Received event details:", workshop_details)
+        print("Received event data:", workshop_data)
+        print("Received event items:", workshop_items)  # Log items
+        print("Received event summary:", workshop_summary)
+
+        # Generate a new event ID based on the last event ID in the database
+        existing_workshop = workshop_collection.find_one(sort=[("workshop_id", -1)])
+        if existing_workshop and "event_id" in existing_workshop:
+            last_workshop_num = int(existing_workshop["workshop_id"][4:])
+            new_workshop_id = f"WKSP{last_workshop_num + 1:02d}"
+        else:
+            new_workshop_id = "WKSP01"
+
+        # Prepare the event entry for the database
+        workshop_entry = {
+            "workshop_id": new_workshop_id,
+            "details": workshop_details,
+            "workshop": workshop_data,
+            "items": workshop_items,
+            "form": workshop_summary,
+            "association_name":association_name,
+            "workshop_name":workshop_name
+        }
+        print("Event Entry to be inserted:", workshop_entry)
+        
+        # Insert data into the database
+        workshop_collection.insert_one(workshop_entry)
+
+        session["workshop_id"] = new_workshop_id
+
+        return jsonify({"status": "success", "message": "Event submitted successfully!", "workshop_id": new_workshop_id}), 200
+
+    except Exception as e:
+        print("Error during event submission:", str(e))
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
+@app.route('/confirm_ws')
+def confirm_ws_page():
+    workshop_id=session.get("workshop_id")
+    return render_template('confirm_ws.html',workshop_id=workshop_id)
+
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
