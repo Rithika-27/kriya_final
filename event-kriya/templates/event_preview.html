@@ -8,48 +8,55 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
+            margin: 20px;
+            padding: 10px;
             background-color: #ffffff;
-            line-height: 1.6;
+            line-height: 1.4;
+            font-size: 12px;
+            /* Reduce font size */
         }
 
         h1 {
             text-align: center;
             color: #333;
-            font-size: 24px;
-            margin-bottom: 30px;
+            font-size: 18px;
+            /* Decrease font size */
+            margin-bottom: 20px;
+            /* Reduce margin */
         }
 
         .section {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+            /* Reduce margin */
         }
 
         h2 {
             color: #333;
-            font-size: 20px;
-            margin-bottom: 10px;
+            font-size: 16px;
+            /* Decrease font size */
+            margin-bottom: 8px;
+            /* Reduce margin */
         }
 
         table {
             width: 100%;
             max-width: 800px;
-            /* Set a max-width to prevent it from being too large */
-            margin: 20px auto;
-            /* Center the table */
+            margin: 10px auto;
+            /* Reduce margin */
             border-collapse: collapse;
             background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            /* Add subtle shadow for depth */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            /* Subtle shadow */
         }
 
         th,
         td {
             border: 1px solid #ffffff;
-            padding: 12px 15px;
-            /* Increase padding for better readability */
+            padding: 8px 10px;
+            /* Reduce padding */
             text-align: left;
-            font-size: 14px;
+            font-size: 12px;
+            /* Reduce font size */
         }
 
         th {
@@ -64,30 +71,36 @@
         .container {
             max-width: 900px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 10px;
+            /* Reduce padding */
         }
 
-        /* Optional: Add responsive design adjustments */
+        /* Responsive adjustments */
         @media (max-width: 768px) {
             table {
                 width: 100%;
-                margin: 20px 0;
+                margin: 10px 0;
             }
 
             th,
             td {
-                padding: 8px;
+                padding: 6px;
+                /* Reduce padding for small screens */
             }
 
             h1 {
-                font-size: 20px;
+                font-size: 16px;
+                /* Further reduce font size */
             }
 
             h2 {
-                font-size: 18px;
+                margin-top: 30px;
+                font-size: 14px;
+                /* Further reduce font size */
             }
         }
     </style>
+
 </head>
 
 <body>
@@ -103,9 +116,14 @@
                     <th>Mobile No</th>
                 </tr>
                 <tr>
-                    <td>{{ form_data.secretary_name }}</td>
-                    <td>{{ form_data.secretary_roll_number }}</td>
-                    <td>{{ form_data.secretary_mobile }}</td>
+                    <td>{{ form_data.secretary1_name }}</td>
+                    <td>{{ form_data.secretary1_roll_number }}</td>
+                    <td>{{ form_data.secretary1_mobile }}</td>
+                </tr>
+                <tr>
+                    <td>{{ form_data.secretary2_name }}</td>
+                    <td>{{ form_data.secretary2_roll_number }}</td>
+                    <td>{{ form_data.secretary2_mobile }}</td>
                 </tr>
             </table>
         </div>
@@ -119,9 +137,14 @@
                     <th>Mobile No</th>
                 </tr>
                 <tr>
-                    <td>{{ form_data.convenor_name }}</td>
-                    <td>{{ form_data.convenor_roll_number }}</td>
-                    <td>{{ form_data.convenor_mobile }}</td>
+                    <td>{{ form_data.convenor1_name }}</td>
+                    <td>{{ form_data.convenor1_roll_number }}</td>
+                    <td>{{ form_data.convenor1_mobile }}</td>
+                </tr>
+                <tr>
+                    <td>{{ form_data.convenor2_name }}</td>
+                    <td>{{ form_data.convenor2_roll_number }}</td>
+                    <td>{{ form_data.convenor2_mobile }}</td>
                 </tr>
 
 
@@ -139,9 +162,14 @@
 
 
                 <tr>
-                    <td>{{ form_data.volunteer}}</td>
-                    <td>{{ form_data.volunteer_roll_number }}</td>
-                    <td>{{ form_data.volunteer_mobile }}</td>
+                    <td>{{ form_data.volunteer1_name}}</td>
+                    <td>{{ form_data.volunteer1_roll_number }}</td>
+                    <td>{{ form_data.volunteer1_mobile }}</td>
+                </tr>
+                <tr>
+                    <td>{{ form_data.volunteer2_name}}</td>
+                    <td>{{ form_data.volunteer2_roll_number }}</td>
+                    <td>{{ form_data.volunteer2_mobile }}</td>
                 </tr>
 
             </table>
