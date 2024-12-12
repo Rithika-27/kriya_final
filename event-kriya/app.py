@@ -1092,16 +1092,16 @@ def submit_presentation():
 
 
         # Generate a new event ID based on the last event ID in the database
-        existing_event = presentation_collection.find_one(sort=[("event_id", -1)])
-        if existing_event and "event_id" in existing_event:
-            last_event_num = int(existing_event["event_id"][4:])
-            event_id = f"EVNT{last_event_num + 1:02d}"
+        existing_event = presentation_collection.find_one(sort=[("presentation_id", -1)])
+        if existing_event and "presentation_id" in existing_event:
+            last_event_num = int(existing_event["presentation_id"][4:])
+            event_id = f"PPST{last_event_num + 1:02d}"
         else:
-            event_id = "EVNT01"
+            presentation_id = "PPST01"
 
         # Prepare the event entry for the database
         presentation_entry = {
-            "presentation_id": event_id,
+            "presentation_id": presentation_id,
             "details": presentation_details,
             "presentation": presentation_data,
             "form": presentation_summary,
@@ -1111,7 +1111,7 @@ def submit_presentation():
         # Insert data into the database
         presentation_collection.insert_one(presentation_entry)
 
-        session["presentation_id"] = event_id
+        session["presentation_id"] = presentation_id
 
         return jsonify({"status": "success", "message": "Presentation submitted successfully!", "presentation_id": event_id}), 200
 
@@ -1122,8 +1122,8 @@ def submit_presentation():
 # Confirmation Page
 @app.route('/confirm2')
 def confirm_page1():
-    event_id=session.get("event_id")
-    return render_template('confirm2.html',event_id=event_id)
+    presentation_id=session.get("presentation_id")
+    return render_template('confirm2.html',presentation_id=presentation_id)
 
 
 
