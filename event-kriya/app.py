@@ -1075,53 +1075,55 @@ def presentation_preview():
     
 @app.route('/submit_presentation', methods=['POST'])
 def submit_presentation():
+    
     try:
         # Get the request JSON data
         all_presentation_data = request.get_json()  # Correct method to get JSON data
-        presentation_details = all_presentation_data.get('presentation_details')
-        presentation_data = all_presentation_data.get('presentation_form_data')
-        # event_items = all_presentation_data.get('eventItems')  # Correct field name should match
-        presentation_summary = all_presentation_data.get('presentation_data')
-        association_name=all_presentation_data.get('association_name')
-        presentation_name=all_presentation_data.get('presentation_name')
+        presentation_details = all_presentation_data.get('presentationDetails')
+        presentation_data = all_presentation_data.get('presentationData')
+        presentation_summary = all_presentation_data.get('presentationFormData')
+        association_name = all_presentation_data.get('association_name')
+        presentation_name = all_presentation_data.get('presentation_name')
 
         # Log the received data to ensure it's correct
-        print("Received event details:", presentation_details)
-        print("Received event data:", presentation_data)
-        # print("Received event items:", event_items)  # Log items
-        print("Received event summary:", presentation_summary)
+        print("Received presentation details:", presentation_details)
+        print("Received presentation data:", presentation_data)
+        print("Received presentation summary:", presentation_summary)
+
 
         # Generate a new event ID based on the last event ID in the database
-        existing_presentation = presentation_collection.find_one(sort=[("presentation_id", -1)])
-        if existing_presentation and "presentation_id" in existing_presentation:
-            last_presentation_num = int(existing_presentation["presentation_id"][4:])
-            new_presentation_id = f"PPST{last_presentation_num + 1:02d}"
+        existing_event = presentation_collection.find_one(sort=[("event_id", -1)])
+        if existing_event and "event_id" in existing_event:
+            last_event_num = int(existing_event["event_id"][4:])
+            event_id = f"EVNT{last_event_num + 1:02d}"
         else:
-            new_presentation_id = "PPST01"
+            event_id = "EVNT01"
 
         # Prepare the event entry for the database
         presentation_entry = {
-            "presentation_id": new_presentation_id,
+            "presentation_id": event_id,
             "details": presentation_details,
-            "event": presentation_data,
-            # "items": event_items,
+            "presentation": presentation_data,
             "form": presentation_summary,
-            "association_name":association_name,
-            "event_name":presentation_name
         }
-        print("Event Entry to be inserted:", presentation_entry)
-        
+        print("Presentation Entry to be inserted:", presentation_entry)
+
         # Insert data into the database
         presentation_collection.insert_one(presentation_entry)
 
-        session["presentation_id"] = new_presentation_id
+        session["presentation_id"] = event_id
 
-        return jsonify({"status": "success", "message": "Event submitted successfully!", "presentation_id": new_presentation_id}), 200
+        return jsonify({"status": "success", "message": "Presentation submitted successfully!", "presentation_id": event_id}), 200
 
     except Exception as e:
-        print("Error during event submission:", str(e))
-        return jsonify({"status": "error", "message": str(e)}), 500
+            print("Error during presentation submission:", str(e))
+            return jsonify({"status": "error", "message": str(e)}), 500
 
+# Confirmation Page
+@app.route('/confirm2')
+def confirm_page1():
+    event_id=session.get("event_id")
+    return render_template('confirm2.html',event_id=event_id)
 
 
 

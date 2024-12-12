@@ -218,57 +218,44 @@
             document.getElementById('back-btn').addEventListener('click', () => {
                 window.location.href = './event_form'; // Adjust to your form page URL
             });
-            function submitWorkshopData() {
-                const workshopDetails = JSON.parse(localStorage.getItem('workshopDetails'));
-                const workshopData = JSON.parse(localStorage.getItem('workshopData'));
-                const workshopItems = JSON.parse(localStorage.getItem('workshopItems'));
-                const workshopFormData = JSON.parse(localStorage.getItem('workshopFormData'));
-                const association_name = localStorage.getItem('association_name');
-                const workshop_name = localStorage.getItem('workshop_name');
-
-                if (workshopDetails && workshopData && workshopItems && workshopFormData && association_name && workshop_name) {
-                    const allWorkshopData = {
-                        association_name,
-                        workshop_name,
-                        workshopDetails,
-                        workshopData,
-                        workshopItems,
-                        workshopFormData
-                    };
-
-                    fetch('/submit_ws_event', {
+            document.getElementById('submit-btn').addEventListener('click', async () => {
+                console.log(localStorage.getItem('presentationData')); // Should print the JSON string or null
+                console.log(localStorage.getItem('presentationDetails'));
+                console.log(localStorage.getItem('presentationFormData'));
+                const Details = JSON.parse(localStorage.getItem('presentationData'));
+                const presentationDetailsnew = JSON.parse(localStorage.getItem('presentationDetails'));
+                const Data = JSON.parse(localStorage.getItem('presentationFormData'));
+                const allData = {
+                    presentationData: JSON.parse(localStorage.getItem('presentationData')),
+                    presentationDetails: JSON.parse(localStorage.getItem('presentationDetails')),
+                    presentationFormData: JSON.parse(localStorage.getItem('presentationFormData')),
+                };
+                try {
+                    const response = await fetch('/submit_presentation', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(allWorkshopData),
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.status === "success") {
-                                window.location.href = '/confirm_ws';
-                            } else {
-                                alert('Error submitting event data: ' + data.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error submitting event data:', error);
-                            alert('Failed to submit event data.');
-                        });
-                } else {
-                    alert('No event data to submit.');
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(allData),
+                    });
+
+                    const result = await response.json();
+
+                    alert(result.message || 'Event and presentation details submitted successfully!');
+                    localStorage.clear();
+                    window.location.href = './confirm2'; // Redirect to confirmation page
+
+                } catch (error) {
+                    console.error('Error submitting data:', error);
+                    alert('Failed to submit data. Please try again.');
                 }
-            }
-
-
-
-            // Handle the submit button
-            document.getElementById('submit-btn').addEventListener('click', () => {
-                alert('Event and presentation details submitted successfully!');
-                localStorage.removeItem('presentationData');
-                localStorage.removeItem('presentationDetails');
-                window.location.href = './confirm.html'; // Redirect to confirmation page
             });
         });
     </script>
+    </body>
+
+</html>
+</script>
 </head>
 
 <body>
@@ -277,7 +264,7 @@
 
         <div class="buttons">
             <button class="back-button" id="back-btn">Back</button>
-            <button onclick="submitWorkshopData()">Submit</button>
+            <button class="back-button" id="submit-btn">Submit</button>
         </div>
     </div>
 </body>
