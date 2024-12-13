@@ -22,8 +22,10 @@
 
     <!-- Search Bar Section -->
     <section class="search-section">
-      <input type="text" class="search-bar" placeholder="Search here...">
-      <button class="login-button">Login</button>
+      <form method="GET" action="{{ url_for('search_event') }}">
+        <input type="text" name="id" class="search-bar" placeholder="search here..." required>
+        <button type="submit" class="search-button">Search</button>
+      </form>
     </section>
 
     <!-- Main Cards Section -->
@@ -60,7 +62,7 @@
 
     <!-- Footer Section -->
     <footer class="page-footer">
-      <p>@Powered by Students Union</p>
+      <p>&copy; Powered by Students Union</p>
     </footer>
   </div>
 </body>

@@ -1363,6 +1363,805 @@ def generate_pdf_content_pp(filepath,event_data):
     buffer.seek(0)
     with open(filepath, "wb") as f:
         f.write(buffer.read())
+@app.route('/event_search')
+def event_search():
+    return render_template('event_search.html')
+@app.route('/workshop_search')
+def workshop_search():
+    return render_template('workshop_search.html')
+@app.route('/workshop_display')
+def workshop_display():
+    return render_template('workshop_display.html')
+
+@app.route('/search_event', methods=['GET'])
+def search_event():
+    search_id = request.args.get('id')  # Get the input from the search bar
+    
+    # If no search ID is provided
+    if not search_id:
+        return render_template('home.html', error="Please enter an ID to search.")
+    
+    # Check if the search ID starts with "WKSP" for workshop
+    if search_id.startswith("WKSP"):
+        # Fetch workshop data from the database
+        workshop = workshop_collection.find_one({"workshop_id": search_id})
+        if workshop:
+            return render_template('workshop_search.html', workshop=workshop, error=None)
+        else:
+            return render_template('workshop_search.html', workshop=None, error="Workshop not found.")
+
+    # Check if the search ID starts with "EVNT" for event
+    elif search_id.startswith("EVNT"):
+        # Fetch event data from the database
+        event = event_collection.find_one({"event_id": search_id})
+        if event:
+            return render_template('event_search.html', event=event, error=None)
+        else:
+            return render_template('event_search.html', event=None, error="Event not found.")
+        
+    elif search_id.startswith("PPST"):
+        # Fetch event data from the database
+        presentation = presentation_collection.find_one({"presentation_id": search_id})
+        if presentation:
+            return render_template('presentation_search.html', presentation=presentation, error=None)
+        else:
+            return render_template('presentation_search.html', presentation=None, error="presentation not found.")
+    
+    # If the ID format is invalid
+    return render_template('workshop_form.html', error="Invalid ID format. Please enter a valid Event ID or Workshop ID.")
+
+
+@app.route('/download_pdf', methods=['GET'])
+def download_pdf():
+    # Retrieve event_id from session
+    event_id = request.args.get('event_id')
+    if not event_id:
+        flash("No event ID found in session.")
+        return redirect(url_for('event_page'))
+
+    # Fetch event data from MongoDB
+    event_datas = event_collection.find_one({"event_id": event_id})
+    if not event_datas:
+        flash("Event data not found.")
+        return redirect(url_for('event_page'))
+
+    try:
+        # Fetch form data for rendering in event_preview.html
+        association_name=event_datas.get("association_name")
+        event_name=event_datas.get("event_name")
+
+        form_data = event_datas.get("details", {})
+        event_data = event_datas.get("form", {})
+        items = event_datas.get("items", {})
+        event_rounds=event_datas.get("event",{})
+
+        # Generate and save multiple pages as PDFs
+        pdf_filenames = []
+        pdf_filepaths = []
+
+        # Page 1
+        html_content_page_1 = render_template(
+            'event_start.html',
+            event_id=event_id,
+            association_name=association_name,
+            event_name=event_name,
+            event_datas=event_datas
+        )
+        pdf_output_page_1 = generate_pdf(html_content_page_1)
+        pdf_filename_page_1 = generate_unique_filename("event_page1")
+        pdf_filepath_page_1 = os.path.join('static', 'uploads', pdf_filename_page_1)
+        save_pdf(pdf_output_page_1, pdf_filepath_page_1)
+        pdf_filenames.append(pdf_filename_page_1)
+        pdf_filepaths.append(pdf_filepath_page_1)
+
+        # Page 2
+        html_content_page_2 = render_template('page2.html')
+        pdf_output_page_2 = generate_pdf(html_content_page_2)
+        pdf_filename_page_2 = generate_unique_filename("event_page2")
+        pdf_filepath_page_2 = os.path.join('static', 'uploads', pdf_filename_page_2)
+        save_pdf(pdf_output_page_2, pdf_filepath_page_2)
+        pdf_filenames.append(pdf_filename_page_2)
+        pdf_filepaths.append(pdf_filepath_page_2)
+
+        # Page 3 (Event preview page)
+        html_content_page_3 = render_template(
+            'event_preview.html',
+            event_id=event_id,
+            form_data=form_data,
+            event_datas=event_datas
+        )
+        pdf_output_page_3 = generate_pdf(html_content_page_3)
+        pdf_filename_page_3 = generate_unique_filename("event_page3")
+        pdf_filepath_page_3 = os.path.join('static', 'uploads', pdf_filename_page_3)
+        save_pdf(pdf_output_page_3, pdf_filepath_page_3)
+        pdf_filenames.append(pdf_filename_page_3)
+        pdf_filepaths.append(pdf_filepath_page_3)
+
+        # Page 4 - Using PdfWriter (No template, programmatically generated)
+        pdf_filename_page_4 = generate_unique_filename("event_page4")
+        pdf_filepath_page_4 = os.path.join('static', 'uploads', pdf_filename_page_4)
+        generate_and_save_pdf_page4(pdf_filepath_page_4, event_data)
+        pdf_filenames.append(pdf_filename_page_4)
+        pdf_filepaths.append(pdf_filepath_page_4)
+
+        # Page 5 (Items Preview)
+        html_content_page_5 = render_template(
+            'items_preview.html',
+            event_id=event_id,
+            items=items,
+            event_datas=event_datas
+        )
+        pdf_output_page_5 = generate_pdf(html_content_page_5)
+        pdf_filename_page_5 = generate_unique_filename("event_page5")
+        pdf_filepath_page_5 = os.path.join('static', 'uploads', pdf_filename_page_5)
+        save_pdf(pdf_output_page_5, pdf_filepath_page_5)
+        pdf_filenames.append(pdf_filename_page_5)
+        pdf_filepaths.append(pdf_filepath_page_5)
+
+        html_content_page_6 = render_template(
+            'rounds_preview.html',
+            event_id=event_id,
+            event_rounds=event_rounds,
+            event_datas=event_datas
+        )
+        pdf_output_page_6 = generate_pdf(html_content_page_6)
+        pdf_filename_page_6 = generate_unique_filename("event_page6")
+        pdf_filepath_page_6 = os.path.join('static', 'uploads', pdf_filename_page_6)
+        save_pdf(pdf_output_page_6, pdf_filepath_page_6)
+        pdf_filenames.append(pdf_filename_page_6)
+        pdf_filepaths.append(pdf_filepath_page_6)
+
+        # Merge the PDFs
+        merged_pdf_filename = f"{event_id}_combined.pdf"
+        merged_pdf_filepath = os.path.join('static', 'uploads', merged_pdf_filename)
+
+        # Use PdfMerger to combine PDFs
+        merger = PdfMerger()
+
+        for pdf_path in pdf_filepaths:
+            merger.append(pdf_path)
+
+        # Write the merged PDF to the server
+        merger.write(merged_pdf_filepath)
+        merger.close()
+
+        # Provide the merged PDF for download
+        # flash(f"PDF successfully created and saved: {merged_pdf_filename}")
+
+        # Clean up intermediate PDFs (delete them)
+        for pdf_path in pdf_filepaths:
+            os.remove(pdf_path)
+
+        return send_from_directory(
+            'static/uploads', 
+            merged_pdf_filename, 
+            as_attachment=True
+        )
+
+    except Exception as e:
+        print(f"Error during preview: {e}")
+        flash("An error occurred while generating the preview.")
+        return redirect(url_for('event_page'))
+
+def generate_unique_filename(prefix):
+    """Generate a unique filename using a UUID and prefix."""
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    unique_id = str(uuid.uuid4().hex[:6])  # Generates a short unique string
+    return f"{prefix}_{timestamp}_{unique_id}.pdf"
+
+def generate_pdf(html_content):
+    """Generate PDF from HTML content using xhtml2pdf."""
+    pdf_output = BytesIO()  # This creates an in-memory binary stream
+    pisa_status = pisa.CreatePDF(html_content, dest=pdf_output)
+    if pisa_status.err:
+        raise Exception("Error occurred while generating the PDF.")
+    pdf_output.seek(0)  # Rewind the buffer to the beginning
+    return pdf_output.read()
+
+def save_pdf(pdf_output, filepath):
+    """Save the generated PDF to the specified filepath."""
+    with open(filepath, "wb") as pdf_file:
+        pdf_file.write(pdf_output)
+
+def generate_and_save_pdf_page4(filepath, event_data):
+    """Generate a custom PDF for page 4 with aligned checkboxes and padding."""
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+
+    # Margins and padding
+    margin = 60
+    padding = 20
+    content_width = width - 2 * margin
+
+    # Top horizontal line
+    pdf.line(margin, height - 40, width - margin, height - 40)
+
+    # Vertical lines
+    vertical_line_x = margin + padding
+    pdf.line(margin, height - 40, margin, height - 540)
+    pdf.line(width - margin, height - 40, width - margin, height - 540)
+
+    y_pos = height - 60
+
+    # Draw circular checkboxes for days
+    label_x = vertical_line_x + 5
+    checkbox_x = label_x + 100
+
+    # Ensure alignment and spacing of days
+    pdf.drawString(label_x, y_pos-10, "Day 1:")
+    pdf.circle(checkbox_x-55, y_pos-5 , 5, fill=1 if event_data.get("day_1") else 0)
+
+    pdf.drawString(label_x + 120, y_pos-10, "Day 2:")
+    pdf.circle(checkbox_x +65, y_pos-5 , 5, fill=1 if event_data.get("day_2") else 0)
+
+    pdf.drawString(label_x + 240, y_pos-10, "Day 3:")
+    pdf.circle(checkbox_x + 185, y_pos-6 , 5, fill=1 if event_data.get("day_3") else 0)
+
+    pdf.drawString(label_x + 360, y_pos-10, "Two Days:")
+    pdf.circle(checkbox_x + 328, y_pos-6, 5, fill=1 if event_data.get("two_days") else 0)
+
+    # Horizontal line
+    y_pos -= 30
+    pdf.line(margin, y_pos, width - margin, y_pos)
+
+    # Event type
+    y_pos -= 20
+    pdf.drawString(label_x, y_pos-10, "Technical Event:")
+    pdf.circle(checkbox_x, y_pos - 6, 5, fill=1 if event_data.get("technical_event") else 0)
+
+    pdf.drawString(label_x + 180, y_pos-10, "Non-Technical Event:")
+    pdf.circle(checkbox_x + 205, y_pos - 6, 5, fill=1 if event_data.get("non_technical_event") else 0)
+
+    # Horizontal line
+    y_pos -= 30
+    pdf.line(margin, y_pos, width - margin, y_pos)
+    center_x = width / 2  # Calculate the center of the page
+    top_y = y_pos+50   # Y-position of the top horizontal line
+    bottom_y = y_pos   # Y-position of the bottom horizontal line
+    pdf.line(center_x-80, top_y, center_x-80, bottom_y)
+    # Rounds
+    y_pos -= 20
+    pdf.drawString(label_x, y_pos-10, f"Rounds: {event_data.get('rounds', 'N/A')}")
+
+    # Horizontal line
+    y_pos -= 30
+    pdf.line(margin, y_pos, width - margin, y_pos)
+
+    # Participants
+    y_pos -= 20
+    pdf.drawString(label_x, y_pos-10, f"Participants: {event_data.get('participants', 'N/A')}")
+
+    # Horizontal line
+    y_pos -= 30
+    pdf.line(margin, y_pos, width - margin, y_pos)
+
+    # Team information
+    y_pos -= 20
+    pdf.drawString(label_x+5, y_pos-7, "Individual:")
+    pdf.circle(checkbox_x-30, y_pos-2, 5, fill=1 if event_data.get("individual") else 0)
+
+    pdf.drawString(label_x + 235, y_pos, "Team:")
+    pdf.circle(checkbox_x + 190, y_pos+3 , 5, fill=1 if event_data.get("team") else 0)
+
+    y_pos -= 20
+    pdf.drawString(label_x+235, y_pos, f"Min Size: {event_data.get('team_min', 'N/A')}")
+    pdf.drawString(label_x + 235, y_pos-20, f"Max Size: {event_data.get('team_max', 'N/A')}")
+
+    # Horizontal line
+    y_pos -= 30
+    pdf.line(margin, y_pos, width - margin, y_pos)
+    center_x = width / 2  # Calculate the center of the page
+    top_y = y_pos+70   # Y-position of the top horizontal line
+    bottom_y = y_pos   # Y-position of the bottom horizontal line
+    pdf.line(center_x, top_y, center_x, bottom_y)
+
+    # Halls and slots
+    y_pos -= 20
+    pdf.drawString(label_x, y_pos-4, f"Halls Required: {event_data.get('halls_required', 'N/A')}")
+    y_pos -= 20
+    pdf.drawString(label_x, y_pos-4, f"Preferred Halls: {event_data.get('preferred_halls', 'N/A')}")
+
+    # Horizontal line
+    y_pos -= 30
+    pdf.line(margin, y_pos, width - margin, y_pos)
+
+    # Slots
+    y_pos -= 20
+    pdf.drawString(label_x, y_pos-5, "Slot Details:")
+    y_pos -= 20
+    pdf.drawString(label_x + 20, y_pos-5, "Slot 1: 9:30 to 12:30")
+    pdf.circle(checkbox_x + 40, y_pos - 1, 5, fill=1 if event_data.get("slot1")  else 0)
+
+    y_pos -= 20
+    pdf.drawString(label_x + 20, y_pos-5, "Slot 2: 1:30 to 4:30")
+    pdf.circle(checkbox_x + 40, y_pos - 1, 5, fill=1 if event_data.get("slot2")  else 0)
+
+    y_pos -= 20
+    pdf.drawString(label_x + 20, y_pos-5, "Full Day")
+    pdf.circle(checkbox_x + 40, y_pos - 1, 5, fill=1 if event_data.get("full_day")  else 0)
+
+    # Horizontal line
+    y_pos -= 30
+    pdf.line(margin, y_pos, width - margin, y_pos)
+
+    # Extension boxes
+    y_pos -= 20
+    pdf.drawString(label_x, y_pos-5, f"Extension Boxes: {event_data.get('extension_boxes', 'N/A')}")
+
+    # Horizontal line
+    y_pos -= 30
+    pdf.line(margin, y_pos, width - margin, y_pos)
+
+    # Signature fields
+    y_pos -= 40
+    pdf.drawString(label_x-25, y_pos, "Signature of the Secretary:")
+    y_pos -= 30
+    pdf.drawString(label_x-25, y_pos, "Signature of the Faculty Advisor:")
+
+    # Save the generated PDF
+    pdf.save()
+
+    # Write the PDF to the specified filepath
+    buffer.seek(0)
+    with open(filepath, "wb") as f:
+        f.write(buffer.read())
+
+@app.route('/download_pdf1', methods=['GET'])
+def download_pdf1():
+    try:
+        # Retrieve event_id from session
+        workshop_id = request.args.get("workshop_id")
+        if not workshop_id:
+            flash("No workshop ID found in session.")
+            return redirect(url_for('workshop_page'))
+
+        # Fetch event data from MongoDB
+        workshop_datas = workshop_collection.find_one({"workshop_id": workshop_id})
+        if not workshop_datas:
+            flash("Workshop data not found.")
+            return redirect(url_for('workshop_page'))
+
+        # Fetch form data for rendering in event_preview.html
+        association_name = workshop_datas.get("association_name")
+        workshop_name = workshop_datas.get("workshop_name")
+
+        form_data = workshop_datas.get("details", {})
+        event_data = workshop_datas.get("form", {})
+        items = workshop_datas.get("items", [])
+        event_rounds = workshop_datas.get("workshop", {})
+
+        # Generate and save multiple pages as PDFs
+        pdf_filenames_ws = []
+        pdf_filepaths_ws = []
+
+        # Page 1: Workshop start page
+        html_content_page_1 = render_template(
+            'workshop_start.html',
+            workshop_id=workshop_id,
+            association_name=association_name,
+            workshop_name=workshop_name,
+            workshop_datas=workshop_datas
+        )
+        pdf_output_page_1 = generate_pdf(html_content_page_1)
+        pdf_filename_page_1 = generate_unique_filename("workshop_page1")
+        pdf_filepath_page_1 = os.path.join('static', 'uploads', pdf_filename_page_1)
+        save_pdf(pdf_output_page_1, pdf_filepath_page_1)
+        pdf_filenames_ws.append(pdf_filename_page_1)
+        pdf_filepaths_ws.append(pdf_filepath_page_1)
+
+        # Page 2: Event details page
+        html_content_page_2 = render_template('page2_ws.html', event_data=event_data, items=items)
+        pdf_output_page_2 = generate_pdf(html_content_page_2)
+        pdf_filename_page_2 = generate_unique_filename("workshop_page2")
+        pdf_filepath_page_2 = os.path.join('static', 'uploads', pdf_filename_page_2)
+        save_pdf(pdf_output_page_2, pdf_filepath_page_2)
+        pdf_filenames_ws.append(pdf_filename_page_2)
+        pdf_filepaths_ws.append(pdf_filepath_page_2)
+
+        # Page 3: Event preview page
+        html_content_page_3 = render_template(
+            'workshop_preview.html',
+            workshop_id=workshop_id,
+            form_data=form_data,
+            # event_rounds=event_rounds,
+            workshop_datas=workshop_datas
+        )
+        pdf_output_page_3 = generate_pdf(html_content_page_3)
+        pdf_filename_page_3 = generate_unique_filename("workshop_page3")
+        pdf_filepath_page_3 = os.path.join('static', 'uploads', pdf_filename_page_3)
+        save_pdf(pdf_output_page_3, pdf_filepath_page_3)
+        pdf_filenames_ws.append(pdf_filename_page_3)
+        pdf_filepaths_ws.append(pdf_filepath_page_3)
+
+        pdf_filename_page_4 = generate_unique_filename("workshop_page4")
+        pdf_filepath_page_4 = os.path.join('static', 'uploads', pdf_filename_page_4)
+        generate_pdf_ws(pdf_filepath_page_4, event_data)
+        pdf_filenames_ws.append(pdf_filename_page_4)
+        pdf_filepaths_ws.append(pdf_filepath_page_4)
+        html_content_page_5 = render_template(
+            'items_preview.html',
+            workshop_id=workshop_id,
+            items=items,
+            workshop_datas=workshop_datas
+        )
+        pdf_output_page_5 = generate_pdf(html_content_page_5)
+        pdf_filename_page_5 = generate_unique_filename("event_page5")
+        pdf_filepath_page_5 = os.path.join('static', 'uploads', pdf_filename_page_5)
+        save_pdf(pdf_output_page_5, pdf_filepath_page_5)
+        pdf_filenames_ws.append(pdf_filename_page_5)
+        pdf_filepaths_ws.append(pdf_filepath_page_5)
+
+        html_content_page_6 = render_template(
+            'session_preview.html',
+            workshop_id=workshop_id,
+            event_rounds=event_rounds,
+            workshop_datas=workshop_datas
+        )
+        pdf_output_page_6 = generate_pdf(html_content_page_6)
+        pdf_filename_page_6 = generate_unique_filename("event_page6")
+        pdf_filepath_page_6 = os.path.join('static', 'uploads', pdf_filename_page_6)
+        save_pdf(pdf_output_page_6, pdf_filepath_page_6)
+        pdf_filenames_ws.append(pdf_filename_page_6)
+        pdf_filepaths_ws.append(pdf_filepath_page_6)
+
+
+        # Merge the PDFs
+        merged_pdf_filename = f"{workshop_id}_combined.pdf"
+        merged_pdf_filepath = os.path.join('static', 'uploads', merged_pdf_filename)
+
+        # Use PdfMerger to combine PDFs
+        merger = PdfMerger()
+        for pdf_path in pdf_filepaths_ws:
+            merger.append(pdf_path)
+
+        # Write the merged PDF to the server
+        merger.write(merged_pdf_filepath)
+        merger.close()
+        for pdf_path in pdf_filepaths_ws:
+            os.remove(pdf_path)
+
+
+        # Provide the merged PDF for download
+        return send_from_directory(
+            'static/uploads',
+            merged_pdf_filename,
+            as_attachment=True
+        )
+
+    except Exception as e:
+        print(f"Error during preview: {e}")
+        flash("An error occurred while generating the preview.")
+        return redirect(url_for('workshop_page'))
+
+def generate_pdf_ws(filepath, event_data):
+    # Set up the canvas
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+    # Starting coordinates
+    start_x = 50
+    start_y = height - 50
+    line_height = 20
+
+    # Outer border lines
+    top_line_y = start_y + 20  # Position for the top horizontal line
+    bottom_line_y = 50  # Position for the bottom horizontal line
+    pdf.line(start_x, top_line_y, width - start_x, top_line_y)  # Top horizontal line
+    pdf.line(start_x, top_line_y, start_x, bottom_line_y+182)  # Left vertical line
+    pdf.line(width - start_x, top_line_y, width - start_x, bottom_line_y+182)  # Right vertical line
+
+    # Title
+    pdf.setFont("Helvetica-Bold", 12)
+    start_y-=10
+    pdf.drawString(start_x + 10, start_y, "DAY 2                    DAY 3                    BOTH DAYS")
+
+    # Circles (checkboxes)
+    pdf.circle(start_x + 62.5, start_y + 4, 5,fill=1 if event_data.get("day")=="day_2" else 0)
+    pdf.circle(start_x + 160, start_y + 4, 5,fill=1 if event_data.get("day")=="day_3" else 0)
+    pdf.circle(start_x + 300, start_y + 4, 5, fill=1 if event_data.get("day")=="both_days" else 0)
+
+    # Table headers
+    start_y -= 20
+    pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
+    start_y -= 20
+    pdf.setFont("Helvetica", 10)
+    pdf.drawString(start_x + 10, start_y, f"EXPECTED NO. OF PARTICIPANTS:{event_data.get('participants','N/A')}")
+    start_y -= 20
+    pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
+    start_y -= line_height
+    pdf.drawString(start_x + 10, start_y, f"PROPOSING FEES:{event_data.get('proposing_fee','N/A')}")
+    pdf.drawString(start_x + 10, start_y - 20, f"Justification:{event_data.get('proposing_fees_justification','N/A')} ")
+
+    # Line separator
+    start_y -= 40
+    pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
+
+    start_y -= 20
+    pdf.drawString(start_x + 10, start_y, f"SPEAKER REMUNERATION (if any)(With justification):{event_data.get('speaker_remuneration','N/A')}")
+    start_y -= 40
+    pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
+
+    # Number of Halls/Labs
+    start_y -= 30
+    pdf.drawString(start_x + 10, start_y, f"NUMBER OF HALLS/LABS REQUIRED:{event_data.get('halls_required','N/A')}")
+    start_y -= line_height
+    pdf.drawString(start_x + 10, start_y, f"HALLS/LABS PREFERRED:{event_data.get('preferred_halls','N/A')}")
+    start_y -= line_height
+    pdf.drawString(start_x + 10, start_y, f"Reason:{event_data.get('preferred_hall_reason','N/A')}")
+    start_y -= 50
+    pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
+
+    # Duration of the Event
+    start_y -= 20
+    pdf.drawString(start_x + 10, start_y, f"DURATION OF THE EVENT IN HOURS:{event_data.get('duration')}")
+    start_y -= 20
+    pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
+
+    # Time Slots
+    start_y -= 30
+    pdf.drawString(start_x + 10, start_y, "START TO END TIME")
+    pdf.drawString(start_x + 270, start_y, "SLOT 1          SLOT 2          FULL DAY")
+    pdf.circle(start_x + 285, start_y-15, 5,fill=1 if event_data.get("slot")=="slot1" else 0)
+    pdf.circle(start_x + 350, start_y-15, 5, fill=1 if event_data.get("slot")=="slot2" else 0)
+    pdf.circle(start_x + 420, start_y-15, 5, fill=1 if event_data.get("slot")=="slot3" else 0)
+
+    start_y -= line_height
+    pdf.drawString(start_x + 10, start_y, "SLOT 1 : 9:30 TO 12:30")
+    pdf.drawString(start_x + 10, start_y - line_height, "SLOT 2 : 1:30 TO 4:30")
+    start_y -= 2 * line_height + 10  # Adjust spacing after time slots
+    pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
+    center_x = width / 2  # Calculate the center of the page
+    top_y = start_y+100   # Y-position of the top horizontal line
+    bottom_y = start_y   # Y-position of the bottom horizontal line
+    pdf.line(center_x, top_y, center_x, bottom_y)
+    # Number Required
+    start_y -= 30  # Space before the "NUMBER REQUIRED" section
+    pdf.drawString(start_x + 10, start_y, f"NUMBER REQUIRED:{event_data.get('extension_boxes')}")
+    pdf.drawString(start_x + 300, start_y, f"1. EXTENSION BOX :{event_data.get('extension_reason')}")
+    start_y -= 30  # Space before the horizontal line
+    pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
+    start_y -= 40
+    pdf.drawString(start_x, start_y, "Signature of the Secretary:")
+    start_y -= 30
+    pdf.drawString(start_x,start_y, "Signature of the Faculty Advisor:")
+    pdf.drawCentredString(width / 2, height - 20, "Workshop Details")
+
+    # Finalize and save the PDF
+    pdf.save()
+    buffer.seek(0)
+    with open(filepath, "wb") as f:
+        f.write(buffer.read())
+@app.route('/download_pdf2', methods=['GET'])
+def download_pdf2():
+    try:
+        # Retrieve event_id from session
+        presentation_id =request.args.get("presentation_id")
+        if not presentation_id:
+            flash("No workshop ID found in session.")
+            return redirect(url_for('presentation_page'))
+
+        # Fetch event data from MongoDB
+        presentation_datas= presentation_collection.find_one({"presentation_id": presentation_id})
+        if not presentation_datas:
+            flash("Presentation data not found.")
+            return redirect(url_for('workshop_page'))
+
+        # Fetch form data for rendering in event_preview.html
+        association_name = presentation_datas.get("association_name")
+        presentation_name = presentation_datas.get("presentation_name")
+
+        form_data = presentation_datas.get("details", {})
+        event_data = presentation_datas.get("form", {})
+       
+        presentation_rounds = presentation_datas.get("presentation", {})
+
+        # Generate and save multiple pages as PDFs
+        pdf_filenames_pp = []
+        pdf_filepaths_pp = []
+
+        # Page 1: Workshop start page
+        html_content_page_1 = render_template(
+            'presentation_start.html',
+            presentation_id=presentation_id,
+            association_name=association_name,
+            presentation_name=presentation_name,
+            presentation_datas=presentation_datas
+        )
+        pdf_output_page_1 = generate_pdf(html_content_page_1)
+        pdf_filename_page_1 = generate_unique_filename("presentation_page1")
+        pdf_filepath_page_1 = os.path.join('static', 'uploads', pdf_filename_page_1)
+        save_pdf(pdf_output_page_1, pdf_filepath_page_1)
+        pdf_filenames_pp.append(pdf_filename_page_1)
+        pdf_filepaths_pp.append(pdf_filepath_page_1)
+
+        # Page 2: Event details page
+        html_content_page_2 = render_template('page2_ws.html',  )
+        pdf_output_page_2 = generate_pdf(html_content_page_2)
+        pdf_filename_page_2 = generate_unique_filename("presentation_page2")
+        pdf_filepath_page_2 = os.path.join('static', 'uploads', pdf_filename_page_2)
+        save_pdf(pdf_output_page_2, pdf_filepath_page_2)
+        pdf_filenames_pp.append(pdf_filename_page_2)
+        pdf_filepaths_pp.append(pdf_filepath_page_2)
+
+        # Page 3: Event preview page
+        html_content_page_3 = render_template(
+            'presentation_page3.html',
+            presentation_id=presentation_id,
+            form_data=form_data,
+            presentation_rounds=presentation_rounds,
+            presentation_datas=presentation_datas
+        )
+        print(form_data)
+        pdf_output_page_3 = generate_pdf(html_content_page_3)
+        pdf_filename_page_3 = generate_unique_filename("presentation_page3")
+        pdf_filepath_page_3 = os.path.join('static', 'uploads', pdf_filename_page_3)
+        save_pdf(pdf_output_page_3, pdf_filepath_page_3)
+        pdf_filenames_pp.append(pdf_filename_page_3)
+        pdf_filepaths_pp.append(pdf_filepath_page_3)
+
+        pdf_filename_page_4 = generate_unique_filename("presentation_page4")
+        pdf_filepath_page_4 = os.path.join('static', 'uploads', pdf_filename_page_4)
+        generate_pdf_content_pp(pdf_filepath_page_4, event_data)
+        pdf_filenames_pp.append(pdf_filename_page_4)
+        pdf_filepaths_pp.append(pdf_filepath_page_4)
+
+        # html_content_page_5 = render_template(
+        #     'items_preview.html',
+        #     presentation_id=presentation_id,
+        #     items=items,
+        #     presentation_datas=presentation_datas
+        # )
+        # pdf_output_page_5 = generate_pdf(html_content_page_5)
+        # pdf_filename_page_5 = generate_unique_filename("presentation_page5")
+        # pdf_filepath_page_5 = os.path.join('static', 'uploads', pdf_filename_page_5)
+        # save_pdf(pdf_output_page_5, pdf_filepath_page_5)
+        # pdf_filenames_pp.append(pdf_filename_page_5)
+        # pdf_filepaths_pp.append(pdf_filepath_page_5)
+
+        html_content_page_6 = render_template(
+            'presentation_last.html',
+            presentation_id=presentation_id,
+            presentation_rounds=presentation_rounds,
+            presentation_datas=presentation_datas
+        )
+        print("Template rendered.")
+        pdf_output_page_6 = generate_pdf(html_content_page_6)
+        pdf_filename_page_6 = generate_unique_filename("presentation_page6")
+        pdf_filepath_page_6 = os.path.join('static', 'uploads', pdf_filename_page_6)
+        save_pdf(pdf_output_page_6, pdf_filepath_page_6)
+        pdf_filenames_pp.append(pdf_filename_page_6)
+        pdf_filepaths_pp.append(pdf_filepath_page_6)
+
+
+        # Merge the PDFs
+        merged_pdf_filename = f"{presentation_id}_combined.pdf"
+        merged_pdf_filepath = os.path.join('static', 'uploads', merged_pdf_filename)
+
+        # Use PdfMerger to combine PDFs
+        merger = PdfMerger()
+        for pdf_path in pdf_filepaths_pp:
+            merger.append(pdf_path)
+
+        # Write the merged PDF to the server
+        merger.write(merged_pdf_filepath)
+        merger.close()
+        for pdf_path in pdf_filepaths_pp:
+            os.remove(pdf_path)
+
+
+        # Provide the merged PDF for download
+        return send_from_directory(
+            'static/uploads',
+            merged_pdf_filename,
+            as_attachment=True
+        )
+
+    except Exception as e:
+        print(f"Error during preview: {e}")
+        flash("An error occurred while generating the preview.")
+        return redirect(url_for('workshop_page'))
+
+def generate_pdf_content_pp(filepath,event_data):
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+
+    # Set margin for text placement
+    margin = 60  # Left margin
+    content_width = width - 2 * margin
+    content_height = height - 2 * margin
+    pdf.drawCentredString(width / 2, height - 30, "Presentation Details")
+    # Draw a straightened horizontal line above the Day 1 contents
+    pdf.line(margin - 20, height - 50, width - margin, height - 50)
+
+    # Draw checkboxes for days (horizontally aligned)
+    pdf.drawString(margin, height - 70, "Day 1:")
+    # pdf.rect(margin + 40, height - 61, 10, 10, fill=1 if event_data.get("day")=="day_2" else 0)
+    pdf.rect(margin + 41, height - 71, 10, 10,  fill=1 if event_data.get("day")=="day_2" else 0)
+
+    pdf.drawString(margin + 80, height - 70, "Day 2:")
+    # pdf.rect(margin + 130, height - 61, 10, 10, fill=1 if event_data.get("day")=="day_3" else 0)
+    pdf.rect(margin + 120, height - 71, 10, 10, fill=1 if event_data.get("day")=="day_3" else 0 )
+
+    pdf.drawString(margin + 170, height - 70, "Both Days:")
+    # pdf.rect(margin + 250, height - 61, 10, 10, fill=1 if event_data.get("day")=="both_days" else 0)
+    pdf.rect(margin + 239, height - 71, 10, 10,fill=1 if event_data.get("day")=="both_days" else 0 )
+    # Draw a line after the checkboxes
+    pdf.line(margin - 20, height - 80, width - margin, height - 80)
+
+    # Draw vertical lines from the top horizontal line to the bottom horizontal line
+    pdf.line(margin - 20, height - 50, margin - 20, height - 570)  # Left vertical line
+    pdf.line(width - margin, height - 50, width - margin, height - 570)  # Right vertical line
+
+    # Draw text fields for event data
+    pdf.drawString(margin, height - 110, f"Expected No. of Participants:{event_data.get('expected_participants', '')} ")
+    pdf.drawString(margin, height - 140, f"Team Size: Min:{event_data.get('team_size_min', '')}")
+
+    # pdf.drawString(margin, height - 110, f"Expected No. of Participants: {event_data.get('participants', '')}")
+    # pdf.drawString(margin, height - 140, f"Team Size: Min: {event_data.get('teamSizeMin', '')}, Max: {event_data.get('teamSizeMax', '')}")
+    pdf.drawString(margin, height - 170, f"Team Size: Max:{event_data.get('team_size_max', '')}")
+    # Draw a line after participants and team size
+    pdf.line(margin - 20, height - 190, width - margin, height - 190)
+
+    pdf.drawString(margin, height - 220, f"Number of Halls/Labs Required:{event_data.get('halls_required', '')} ")
+    # pdf.drawString(margin, height - 170, f"Number of Halls/Labs Required: {event_data.get('hallsRequired', '')}")
+
+    pdf.drawString(margin, height - 250, f"Halls/Labs Preferred:{event_data.get('preferred_halls', '')}")
+    # pdf.drawString(margin + 20, height - 270, event_data.get("hallsPreferred", ""))
+
+    pdf.drawString(margin, height - 280, f"Reason for Multiple Halls:{event_data.get('hall_reason', '')}")
+    # pdf.drawString(margin + 20, height - 220, event_data.get("hallReason", ""))
+
+    # Draw a line after halls and reasons
+    # pdf.line(margin - 20, height - 230, width - margin, height - 230)
+
+
+    # Draw a line after halls preferred
+    pdf.line(margin - 20, height - 310, width - margin, height - 310)
+
+    # Draw radio buttons for duration
+    pdf.drawString(margin, height - 330, f"Duration of the Event in Hours:{event_data.get('duration', '')}")
+    pdf.drawString(margin + 20, height - 350, "Slot 1: 9:30 to 12:30")
+    pdf.circle(margin + 160, height - 345, 5,  fill=1 if event_data.get("time_slot") == "slot_1" else 0)
+    pdf.drawString(margin + 20, height - 370, "Slot 2: 1:30 to 4:30")
+    pdf.circle(margin + 160, height - 365, 5, fill=1 if event_data.get("time_slot") == "slot_2" else 0 )
+    pdf.drawString(margin + 20, height - 390, "Full Day")
+    pdf.circle(margin + 160, height - 385, 5, fill=1 if event_data.get("time_slot") == "full_day" else 0 )
+
+    # pdf.drawString(margin, height - 300, "Duration of the Event in Hours:")
+    # pdf.drawString(margin + 20, height - 320, "Slot 1: 9:30 to 12:30")
+    # pdf.circle(margin + 160, height - 315, 5, fill=1 if event_data.get("duration") == "slot1" else 0)
+    # pdf.drawString(margin + 20, height - 340, "Slot 2: 1:30 to 4:30")
+    # pdf.circle(margin + 160, height - 335, 5, fill=1 if event_data.get("duration") == "slot2" else 0)
+    # pdf.drawString(margin + 20, height - 360, "Full Day")
+    # pdf.circle(margin + 160, height - 355, 5, fill=1 if event_data.get("duration") == "fullDay" else 0)
+    # Draw a line after the duration radio buttons
+    pdf.line(margin - 20, height - 410, width - margin, height - 410)
+
+    pdf.drawString(margin, height - 440, f"Number Required:{event_data.get('extension_boxes', '')}")
+    # pdf.drawString(margin, height - 390, f"Number Required: {event_data.get('numberRequired', '')}")
+    pdf.drawString(margin, height - 470, f"Reason for Number:{event_data.get('extension_box_reason', '')}")
+    # pdf.drawString(margin + 20, height - 440, event_data.get("numberReason", ""))
+
+    # Draw a line after number and reason
+    pdf.line(margin - 20, height - 500, width - margin, height - 500)
+
+    pdf.drawString(margin, height - 525, f"Extension Box: ")
+    # pdf.drawString(margin, height - 470, f"Extension Box: {event_data.get('extensionBox', '')}")
+
+    # Draw a line after the extension box
+    pdf.line(margin - 20, height - 570, width - margin, height - 570)
+
+    # Draw signature fields
+    pdf.drawString(margin-15, height - 610, f"Signature of the Secretary: ")
+    pdf.drawString(margin-15, height - 640, f"Signature of the Faculty Advisor: ")
+
+    pdf.save()
+    buffer.seek(0)
+    with open(filepath, "wb") as f:
+        f.write(buffer.read())
+
 
 
 

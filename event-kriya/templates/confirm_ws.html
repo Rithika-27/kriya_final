@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/confirm.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/confirm_ws.css') }}">
     <title>Submission Confirmation</title>
 </head>
 
@@ -18,8 +18,8 @@
         {% endif %}
         {% endwith %}
 
-        <h1>Event Submission Successful!</h1>
-        <p>Your Event Approval Form has been successfully submitted.</p>
+        <h1>Workshop Submission Successful!</h1>
+        <p>Your Workshop Approval Form has been successfully submitted.</p>
 
         <p><strong class="event-id">Generated workshop ID: {{ workshop_id }}</strong></p>
 
