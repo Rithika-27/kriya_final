@@ -40,11 +40,11 @@
             // Enable/disable reason fields for halls and preferred halls
             const updateReasonFields = () => {
                 hallsReasonField.disabled = !(hallsField.value > 1);
-                preferredHallsReasonField.disabled = !(preferredHallsField.value > 1);
+                // preferredHallsReasonField.disabled = !(preferredHallsField.value > 1);
             };
 
             hallsField.addEventListener('input', updateReasonFields);
-            preferredHallsField.addEventListener('input', updateReasonFields);
+            // preferredHallsField.addEventListener('input', updateReasonFields);
 
             // Prevent negative numbers in numeric inputs
             numericInputs.forEach(input => {
@@ -127,7 +127,7 @@
                 </tr>
 
                 <!-- Event Type -->
-                <tr>
+                <!-- <tr>
                     <th colspan="5">Event Type</th>
                 </tr>
                 <tr>
@@ -135,7 +135,7 @@
                         <label><input type="radio" name="event_type" value="technical"> Technical Event</label>
                         <label><input type="radio" name="event_type" value="non_technical"> Non-Technical Event</label>
                     </td>
-                </tr>
+                </tr> -->
 
                 <!-- Rounds and Participants -->
                 <tr>
@@ -196,7 +196,7 @@
                 <tr>
                     <th>Reason for Preferred Halls</th>
                     <th colspan="4"><input type="text" name="preferred_hall_reason"
-                            placeholder="Specify reason for preferred halls" disabled></textarea></th>
+                            placeholder="Specify reason for preferred halls"></textarea></th>
                 </tr>
 
                 <!-- Slot -->

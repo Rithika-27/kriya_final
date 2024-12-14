@@ -1033,10 +1033,13 @@ def presentation_form():
         presentation_description = request.form.get('event_description')
         topics_and_theme = request.form.get('topics_and_theme')
         presentation_rules = request.form.get('event_rules')
+
+        # Fetch the number of rounds dynamically
+        round_no = int(request.form.get('round_no', 0))  # Default to 0 if not provided
         rounds = []
 
-        # Extract round-wise details
-        for i in range(1, 5):  # Assuming 4 rounds as per your form
+        # Extract round-wise details dynamically
+        for i in range(1, round_no + 1):  # Loop based on the number of rounds entered
             rounds.append({
                 "round_no": i,
                 "time": request.form.get(f'round_{i}_time'),
@@ -1056,7 +1059,6 @@ def presentation_form():
 
     # Render the form template
     return render_template('presentation_form.html')
-
 @app.route('/presentation_preview', methods=['GET'])
 def presentation_preview():
     try:

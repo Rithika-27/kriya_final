@@ -26,45 +26,26 @@
             <textarea id="event_rules" name="event_rules"
                 placeholder="Mention deadline for ABSTRACT submission by participants in terms of days from start of registrations"></textarea>
 
-            <!-- Round-wise Description -->
-            <h3>Round-wise Description of the Event:</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Round</th>
-                        <th>Time</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td><input type="text" id="round_1_time" name="round_1_time" placeholder="Enter time"></td>
-                        <td><textarea id="round_1_description" name="round_1_description"
-                                placeholder="Enter description"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td><input type="text" id="round_2_time" name="round_2_time" placeholder="Enter time"></td>
-                        <td><textarea id="round_2_description" name="round_2_description"
-                                placeholder="Enter description"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td><input type="text" id="round_3_time" name="round_3_time" placeholder="Enter time"></td>
-                        <td><textarea id="round_3_description" name="round_3_description"
-                                placeholder="Enter description"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td><input type="text" id="round_4_time" name="round_4_time" placeholder="Enter time"></td>
-                        <td><textarea id="round_4_description" name="round_4_description"
-                                placeholder="Enter description"></textarea></td>
-                    </tr>
-                </tbody>
-            </table>
+            <!-- Number of Rounds -->
+            <h3>Number of Rounds:</h3>
+            <input type="number" id="round_no" placeholder="Enter number of rounds" min="1" />
 
-            <!-- Signatures -->
+            <!-- Round-wise Description (Hidden by Default) -->
+            <div id="roundsSection" style="display: none;">
+                <h3>Round-wise Description of the Event:</h3>
+                <table id="roundsTable">
+                    <thead>
+                        <tr>
+                            <th>Round</th>
+                            <th>Time</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody id="roundsBody">
+                        <!-- Dynamic round rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
 
             <!-- Submit Button -->
             <div style="text-align: center; margin-top: 20px;">
@@ -74,6 +55,38 @@
     </div>
 
     <script>
+        // Function to generate round input fields dynamically
+        function generateRounds() {
+            const roundNo = document.getElementById('round_no').value;
+            const roundsBody = document.getElementById('roundsBody');
+            const roundsSection = document.getElementById('roundsSection');
+
+            // Show or hide the rounds section based on valid input
+            if (!roundNo || roundNo <= 0) {
+                roundsBody.innerHTML = ''; // Clear existing rows
+                roundsSection.style.display = 'none';
+                return;
+            }
+
+            // Show the section and generate rows
+            roundsSection.style.display = 'block';
+            roundsBody.innerHTML = ''; // Clear existing rows
+
+            for (let i = 1; i <= roundNo; i++) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${i}</td>
+                    <td><input type="text" id="round_${i}_time" name="round${i}_time" placeholder="Enter time"></td>
+                    <td><textarea id="round_${i}_description" name="round${i}_description" placeholder="Enter description"></textarea></td>
+                `;
+                roundsBody.appendChild(row);
+            }
+        }
+
+        // Listen for changes in the number of rounds field
+        document.getElementById('round_no').addEventListener('input', generateRounds);
+
+        // Load saved data from localStorage on page load
         function loadFromLocalStorage() {
             const savedData = localStorage.getItem('presentationData');
             if (savedData) {
@@ -85,7 +98,10 @@
                     document.getElementById('topics_and_theme').value = eventDetails.topics_and_theme || '';
                     document.getElementById('event_rules').value = eventDetails.event_rules || '';
 
+                    // Repopulate the number of rounds
                     const rounds = eventDetails.rounds || [];
+                    document.getElementById('round_no').value = rounds.length || '';
+                    generateRounds(); // Generate round fields dynamically
                     rounds.forEach((round, index) => {
                         const roundIndex = index + 1;
                         document.getElementById(`round_${roundIndex}_time`).value = round.time || '';
@@ -97,31 +113,23 @@
             }
         }
 
-        // Call the function on page load
-        window.onload = loadFromLocalStorage;
+        // Save data to localStorage
         function saveToLocalStorage() {
+            const roundNo = document.getElementById('round_no').value;
+            const rounds = [];
+
+            for (let i = 1; i <= roundNo; i++) {
+                rounds.push({
+                    time: document.getElementById(`round_${i}_time`).value,
+                    description: document.getElementById(`round_${i}_description`).value
+                });
+            }
+
             const eventDetails = {
                 event_description: document.getElementById('event_description').value,
                 topics_and_theme: document.getElementById('topics_and_theme').value,
                 event_rules: document.getElementById('event_rules').value,
-                rounds: [
-                    {
-                        time: document.getElementById('round_1_time').value,
-                        description: document.getElementById('round_1_description').value
-                    },
-                    {
-                        time: document.getElementById('round_2_time').value,
-                        description: document.getElementById('round_2_description').value
-                    },
-                    {
-                        time: document.getElementById('round_3_time').value,
-                        description: document.getElementById('round_3_description').value
-                    },
-                    {
-                        time: document.getElementById('round_4_time').value,
-                        description: document.getElementById('round_4_description').value
-                    }
-                ]
+                rounds: rounds
             };
 
             // Save to local storage
@@ -135,6 +143,9 @@
             // Redirect to preview page
             window.location.href = "/presentation_preview";
         }
+
+        // Call the function on page load
+        window.onload = loadFromLocalStorage;
     </script>
 </body>
 

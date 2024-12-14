@@ -100,96 +100,19 @@
         <div class="content">{{ presentation_rounds.event_rules }}</div>
     </div>
 
-    <!-- Rounds -->
-    <!-- {% for round in presentation_rounds.rounds %} -->
+    {% for round in presentation_rounds.rounds %}
     <div class="round-section">
-        <!-- <h2>ROUND - {{ loop.index }}</h2> -->
-
-        <div class="inline-section">
-            <span class="label">NAME:</span>
-            <!-- <span class="value">{{ round.round_name }}</span> -->
-        </div>
-
-        <div class="section">
-            <span class="label">DESCRIPTION:</span>
-            <!-- <div class="content">{{ round.round_description }}</div> -->
-        </div>
-
-        <div class="inline-section">
-            <span class="label">ROUND RULES:</span>
-            <!-- <div class="content" style="white-space: pre-line;">{{ round.round_rules}}</div> -->
-        </div>
-    </div>
-    <div class="round-section">
-        <!-- <h2>ROUND - {{ loop.index }}</h2> -->
-        <h2>ROUND - 1</h2>
+        <h2>ROUND - {{ loop.index }}</h2>
         <div class="inline-section">
             <span class="label">TIME:</span>
-            <span class="value">{{ presentation_rounds.round_1_time }}</span>
+            <span class="value">{{ round.time }}</span>
         </div>
-
         <div class="section">
             <span class="label">DESCRIPTION:</span>
-            <div class="content">{{ presentation_rounds.round_1_description }}</div>
+            <div class="content">{{ round.description }}</div>
         </div>
-
-        <!-- <div class="inline-section">
-            <span class="label">ROUND RULES:</span>
-            <div class="content" style="white-space: pre-line;">{{ round.round_rules}}</div>
-        </div> -->
     </div>
-    <div class="round-section">
-        <!-- <h2>ROUND - {{ loop.index }}</h2> -->
-        <h2>ROUND - 2</h2>
-        <div class="inline-section">
-            <span class="label">TIME:</span>
-            <span class="value">{{ presentation_rounds.round_2_time }}</span>
-        </div>
-
-        <div class="section">
-            <span class="label">DESCRIPTION:</span>
-            <div class="content">{{ presentation_rounds.round_2_description }}</div>
-        </div>
-
-        <!-- <div class="inline-section">
-            <span class="label">ROUND RULES:</span>
-            <div class="content" style="white-space: pre-line;">{{ round.round_rules}}</div>
-        </div> -->
-    </div>
-    <div class="round-section">
-        <!-- <h2>ROUND - {{ loop.index }}</h2> -->
-        <h2>ROUND - 3</h2>
-        <div class="inline-section">
-            <span class="label">TIME:</span>
-            <span class="value">{{ presentation_rounds.round_3_time }}</span>
-        </div>
-
-        <div class="section">
-            <span class="label">DESCRIPTION:</span>
-            <div class="content">{{ presentation_rounds.round_3_description }}</div>
-        </div>
-
-        <!-- <div class="inline-section">
-            <span class="label">ROUND RULES:</span>
-            <div class="content" style="white-space: pre-line;">{{ round.round_rules}}</div>
-        </div> -->
-    </div>
-    <div class="round-section">
-        <!-- <h2>ROUND - {{ loop.index }}</h2> -->
-        <h2>ROUND - 4</h2>
-        <div class="inline-section">
-            <span class="label">TIME:</span>
-            <span class="value">{{ presentation_rounds.round_4_time }}</span>
-        </div>
-
-        <div class="section">
-            <span class="label">DESCRIPTION:</span>
-            <div class="content">{{ presentation_rounds.round_4_description }}</div>
-        </div>
-
-
-    </div>
-    <!-- {% endfor %} -->
+    {% endfor %}
     <div class="signature">
         <div>Signature of the Secretary</div>
         <div class="sign">Signature of the Faculty Advisor</div>
