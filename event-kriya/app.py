@@ -402,14 +402,15 @@ def generate_and_save_pdf_page4(filepath, event_data):
     margin = 60
     padding = 20
     content_width = width - 2 * margin
+    pdf.drawCentredString(width / 2, height - 30, "Event Details")
 
     # Top horizontal line
     pdf.line(margin, height - 40, width - margin, height - 40)
 
     # Vertical lines
     vertical_line_x = margin + padding
-    pdf.line(margin, height - 40, margin, height - 610.9)
-    pdf.line(width - margin, height - 40, width - margin, height - 610.9)
+    pdf.line(margin, height - 40, margin, height - 520)
+    pdf.line(width - margin, height - 40, width - margin, height - 520)
 
     y_pos = height - 60
 
@@ -433,17 +434,10 @@ def generate_and_save_pdf_page4(filepath, event_data):
             y_pos -= 20
             pdf.drawString(label_x+360, y_pos-10, f"Days: {event_data.get('two_days', 'N/A')}")
 
-    # Horizontal line
-    y_pos -= 30
-    pdf.line(margin, y_pos, width - margin, y_pos)
 
     # Horizontal line
     y_pos -= 30
     pdf.line(margin, y_pos, width - margin, y_pos)
-    center_x = width / 2  # Calculate the center of the page
-    top_y = y_pos+50   # Y-position of the top horizontal line
-    bottom_y = y_pos   # Y-position of the bottom horizontal line
-    pdf.line(center_x-80, top_y, center_x-80, bottom_y)
     # Rounds
     y_pos -= 20
     pdf.drawString(label_x, y_pos-10, f"No of Rounds: {event_data.get('rounds', 'N/A')}")
@@ -867,6 +861,7 @@ def generate_pdf_ws(filepath, event_data):
     start_x = 50
     start_y = height - 50
     line_height = 20
+   
 
     # Outer border lines
     top_line_y = start_y + 20  # Position for the top horizontal line
@@ -903,6 +898,7 @@ def generate_pdf_ws(filepath, event_data):
 
     start_y -= 20
     pdf.drawString(start_x + 10, start_y, f"SPEAKER REMUNERATION (if any)(With justification):{event_data.get('speaker_remuneration','N/A')}")
+    pdf.drawString(start_x + 10, start_y - 20, f"Justification:{event_data.get('speaker_remuneration_justification','N/A')} ")
     start_y -= 40
     pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
 
@@ -1565,149 +1561,149 @@ def save_pdf(pdf_output, filepath):
     with open(filepath, "wb") as pdf_file:
         pdf_file.write(pdf_output)
 
-def generate_and_save_pdf_page4(filepath, event_data):
-    """Generate a custom PDF for page 4 with aligned checkboxes and padding."""
-    buffer = BytesIO()
-    pdf = canvas.Canvas(buffer, pagesize=letter)
-    width, height = letter
+# def generate_and_save_pdf_page41(filepath, event_data):
+#     """Generate a custom PDF for page 4 with aligned checkboxes and padding."""
+#     buffer = BytesIO()
+#     pdf = canvas.Canvas(buffer, pagesize=letter)
+#     width, height = letter
 
-    # Margins and padding
-    margin = 60
-    padding = 20
-    content_width = width - 2 * margin
+#     # Margins and padding
+#     margin = 60
+#     padding = 20
+#     content_width = width - 2 * margin
 
-    # Top horizontal line
-    pdf.line(margin, height - 40, width - margin, height - 40)
+#     # Top horizontal line
+#     pdf.line(margin, height - 40, width - margin, height - 40)
 
-    # Vertical lines
-    vertical_line_x = margin + padding
-    pdf.line(margin, height - 40, margin, height - 540)
-    pdf.line(width - margin, height - 40, width - margin, height - 540)
+#     # Vertical lines
+#     vertical_line_x = margin + padding
+#     pdf.line(margin, height - 40, margin, height - 540)
+#     pdf.line(width - margin, height - 40, width - margin, height - 540)
 
-    y_pos = height - 60
+#     y_pos = height - 60
 
-    # Draw circular checkboxes for days
-    label_x = vertical_line_x + 5
-    checkbox_x = label_x + 100
+#     # Draw circular checkboxes for days
+#     label_x = vertical_line_x + 5
+#     checkbox_x = label_x + 100
 
-    # Ensure alignment and spacing of days
-    pdf.drawString(label_x, y_pos-10, "Day 1:")
-    pdf.circle(checkbox_x-55, y_pos-5 , 5, fill=1 if event_data.get("day_1") else 0)
+#     # Ensure alignment and spacing of days
+#     pdf.drawString(label_x, y_pos-10, "Day 1:")
+#     pdf.circle(checkbox_x-55, y_pos-5 , 5, fill=1 if event_data.get("day_1") else 0)
 
-    pdf.drawString(label_x + 120, y_pos-10, "Day 2:")
-    pdf.circle(checkbox_x +65, y_pos-5 , 5, fill=1 if event_data.get("day_2") else 0)
+#     pdf.drawString(label_x + 120, y_pos-10, "Day 2:")
+#     pdf.circle(checkbox_x +65, y_pos-5 , 5, fill=1 if event_data.get("day_2") else 0)
 
-    pdf.drawString(label_x + 240, y_pos-10, "Day 3:")
-    pdf.circle(checkbox_x + 185, y_pos-6 , 5, fill=1 if event_data.get("day_3") else 0)
+#     pdf.drawString(label_x + 240, y_pos-10, "Day 3:")
+#     pdf.circle(checkbox_x + 185, y_pos-6 , 5, fill=1 if event_data.get("day_3") else 0)
 
-    pdf.drawString(label_x + 360, y_pos-10, "Two Days:")
-    pdf.circle(checkbox_x + 328, y_pos-6, 5, fill=1 if event_data.get("two_days") else 0)
+#     pdf.drawString(label_x + 360, y_pos-10, "Two Days:")
+#     pdf.circle(checkbox_x + 328, y_pos-6, 5, fill=1 if event_data.get("two_days") else 0)
 
-    # Horizontal line
-    y_pos -= 30
-    pdf.line(margin, y_pos, width - margin, y_pos)
+#     # Horizontal line
+#     y_pos -= 30
+#     pdf.line(margin, y_pos, width - margin, y_pos)
 
-    # Event type
-    y_pos -= 20
-    pdf.drawString(label_x, y_pos-10, "Technical Event:")
-    pdf.circle(checkbox_x, y_pos - 6, 5, fill=1 if event_data.get("technical_event") else 0)
+#     # Event type
+#     y_pos -= 20
+#     pdf.drawString(label_x, y_pos-10, "Technical Event:")
+#     pdf.circle(checkbox_x, y_pos - 6, 5, fill=1 if event_data.get("technical_event") else 0)
 
-    pdf.drawString(label_x + 180, y_pos-10, "Non-Technical Event:")
-    pdf.circle(checkbox_x + 205, y_pos - 6, 5, fill=1 if event_data.get("non_technical_event") else 0)
+#     pdf.drawString(label_x + 180, y_pos-10, "Non-Technical Event:")
+#     pdf.circle(checkbox_x + 205, y_pos - 6, 5, fill=1 if event_data.get("non_technical_event") else 0)
 
-    # Horizontal line
-    y_pos -= 30
-    pdf.line(margin, y_pos, width - margin, y_pos)
-    center_x = width / 2  # Calculate the center of the page
-    top_y = y_pos+50   # Y-position of the top horizontal line
-    bottom_y = y_pos   # Y-position of the bottom horizontal line
-    pdf.line(center_x-80, top_y, center_x-80, bottom_y)
-    # Rounds
-    y_pos -= 20
-    pdf.drawString(label_x, y_pos-10, f"Rounds: {event_data.get('rounds', 'N/A')}")
+#     # Horizontal line
+#     y_pos -= 30
+#     pdf.line(margin, y_pos, width - margin, y_pos)
+#     center_x = width / 2  # Calculate the center of the page
+#     top_y = y_pos+50   # Y-position of the top horizontal line
+#     bottom_y = y_pos   # Y-position of the bottom horizontal line
+#     pdf.line(center_x-80, top_y, center_x-80, bottom_y)
+#     # Rounds
+#     y_pos -= 20
+#     pdf.drawString(label_x, y_pos-10, f"Rounds: {event_data.get('rounds', 'N/A')}")
 
-    # Horizontal line
-    y_pos -= 30
-    pdf.line(margin, y_pos, width - margin, y_pos)
+#     # Horizontal line
+#     y_pos -= 30
+#     pdf.line(margin, y_pos, width - margin, y_pos)
 
-    # Participants
-    y_pos -= 20
-    pdf.drawString(label_x, y_pos-10, f"Participants: {event_data.get('participants', 'N/A')}")
+#     # Participants
+#     y_pos -= 20
+#     pdf.drawString(label_x, y_pos-10, f"Participants: {event_data.get('participants', 'N/A')}")
 
-    # Horizontal line
-    y_pos -= 30
-    pdf.line(margin, y_pos, width - margin, y_pos)
+#     # Horizontal line
+#     y_pos -= 30
+#     pdf.line(margin, y_pos, width - margin, y_pos)
 
-    # Team information
-    y_pos -= 20
-    pdf.drawString(label_x+5, y_pos-7, "Individual:")
-    pdf.circle(checkbox_x-30, y_pos-2, 5, fill=1 if event_data.get("individual") else 0)
+#     # Team information
+#     y_pos -= 20
+#     pdf.drawString(label_x+5, y_pos-7, "Individual:")
+#     pdf.circle(checkbox_x-30, y_pos-2, 5, fill=1 if event_data.get("individual") else 0)
 
-    pdf.drawString(label_x + 235, y_pos, "Team:")
-    pdf.circle(checkbox_x + 190, y_pos+3 , 5, fill=1 if event_data.get("team") else 0)
+#     pdf.drawString(label_x + 235, y_pos, "Team:")
+#     pdf.circle(checkbox_x + 190, y_pos+3 , 5, fill=1 if event_data.get("team") else 0)
 
-    y_pos -= 20
-    pdf.drawString(label_x+235, y_pos, f"Min Size: {event_data.get('team_min', 'N/A')}")
-    pdf.drawString(label_x + 235, y_pos-20, f"Max Size: {event_data.get('team_max', 'N/A')}")
+#     y_pos -= 20
+#     pdf.drawString(label_x+235, y_pos, f"Min Size: {event_data.get('team_min', 'N/A')}")
+#     pdf.drawString(label_x + 235, y_pos-20, f"Max Size: {event_data.get('team_max', 'N/A')}")
 
-    # Horizontal line
-    y_pos -= 30
-    pdf.line(margin, y_pos, width - margin, y_pos)
-    center_x = width / 2  # Calculate the center of the page
-    top_y = y_pos+70   # Y-position of the top horizontal line
-    bottom_y = y_pos   # Y-position of the bottom horizontal line
-    pdf.line(center_x, top_y, center_x, bottom_y)
+#     # Horizontal line
+#     y_pos -= 30
+#     pdf.line(margin, y_pos, width - margin, y_pos)
+#     center_x = width / 2  # Calculate the center of the page
+#     top_y = y_pos+70   # Y-position of the top horizontal line
+#     bottom_y = y_pos   # Y-position of the bottom horizontal line
+#     pdf.line(center_x, top_y, center_x, bottom_y)
 
-    # Halls and slots
-    y_pos -= 20
-    pdf.drawString(label_x, y_pos-4, f"Halls Required: {event_data.get('halls_required', 'N/A')}")
-    y_pos -= 20
-    pdf.drawString(label_x, y_pos-4, f"Preferred Halls: {event_data.get('preferred_halls', 'N/A')}")
+#     # Halls and slots
+#     y_pos -= 20
+#     pdf.drawString(label_x, y_pos-4, f"Halls Required: {event_data.get('halls_required', 'N/A')}")
+#     y_pos -= 20
+#     pdf.drawString(label_x, y_pos-4, f"Preferred Halls: {event_data.get('preferred_halls', 'N/A')}")
 
-    # Horizontal line
-    y_pos -= 30
-    pdf.line(margin, y_pos, width - margin, y_pos)
+#     # Horizontal line
+#     y_pos -= 30
+#     pdf.line(margin, y_pos, width - margin, y_pos)
 
-    # Slots
-    y_pos -= 20
-    pdf.drawString(label_x, y_pos-5, "Slot Details:")
-    y_pos -= 20
-    pdf.drawString(label_x + 20, y_pos-5, "Slot 1: 9:30 to 12:30")
-    pdf.circle(checkbox_x + 40, y_pos - 1, 5, fill=1 if event_data.get("slot1")  else 0)
+#     # Slots
+#     y_pos -= 20
+#     pdf.drawString(label_x, y_pos-5, "Slot Details:")
+#     y_pos -= 20
+#     pdf.drawString(label_x + 20, y_pos-5, "Slot 1: 9:30 to 12:30")
+#     pdf.circle(checkbox_x + 40, y_pos - 1, 5, fill=1 if event_data.get("slot1")  else 0)
 
-    y_pos -= 20
-    pdf.drawString(label_x + 20, y_pos-5, "Slot 2: 1:30 to 4:30")
-    pdf.circle(checkbox_x + 40, y_pos - 1, 5, fill=1 if event_data.get("slot2")  else 0)
+#     y_pos -= 20
+#     pdf.drawString(label_x + 20, y_pos-5, "Slot 2: 1:30 to 4:30")
+#     pdf.circle(checkbox_x + 40, y_pos - 1, 5, fill=1 if event_data.get("slot2")  else 0)
 
-    y_pos -= 20
-    pdf.drawString(label_x + 20, y_pos-5, "Full Day")
-    pdf.circle(checkbox_x + 40, y_pos - 1, 5, fill=1 if event_data.get("full_day")  else 0)
+#     y_pos -= 20
+#     pdf.drawString(label_x + 20, y_pos-5, "Full Day")
+#     pdf.circle(checkbox_x + 40, y_pos - 1, 5, fill=1 if event_data.get("full_day")  else 0)
 
-    # Horizontal line
-    y_pos -= 30
-    pdf.line(margin, y_pos, width - margin, y_pos)
+#     # Horizontal line
+#     y_pos -= 30
+#     pdf.line(margin, y_pos, width - margin, y_pos)
 
-    # Extension boxes
-    y_pos -= 20
-    pdf.drawString(label_x, y_pos-5, f"Extension Boxes: {event_data.get('extension_boxes', 'N/A')}")
+#     # Extension boxes
+#     y_pos -= 20
+#     pdf.drawString(label_x, y_pos-5, f"Extension Boxes: {event_data.get('extension_boxes', 'N/A')}")
 
-    # Horizontal line
-    y_pos -= 30
-    pdf.line(margin, y_pos, width - margin, y_pos)
+#     # Horizontal line
+#     y_pos -= 30
+#     pdf.line(margin, y_pos, width - margin, y_pos)
 
-    # Signature fields
-    y_pos -= 40
-    pdf.drawString(label_x-25, y_pos, "Signature of the Secretary:")
-    y_pos -= 30
-    pdf.drawString(label_x-25, y_pos, "Signature of the Faculty Advisor:")
+#     # Signature fields
+#     y_pos -= 40
+#     pdf.drawString(label_x-25, y_pos, "Signature of the Secretary:")
+#     y_pos -= 30
+#     pdf.drawString(label_x-25, y_pos, "Signature of the Faculty Advisor:")
 
-    # Save the generated PDF
-    pdf.save()
+#     # Save the generated PDF
+#     pdf.save()
 
-    # Write the PDF to the specified filepath
-    buffer.seek(0)
-    with open(filepath, "wb") as f:
-        f.write(buffer.read())
+#     # Write the PDF to the specified filepath
+#     buffer.seek(0)
+#     with open(filepath, "wb") as f:
+#         f.write(buffer.read())
 
 @app.route('/download_pdf1', methods=['GET'])
 def download_pdf1():
@@ -1836,104 +1832,104 @@ def download_pdf1():
         flash("An error occurred while generating the preview.")
         return redirect(url_for('workshop_page'))
 
-def generate_pdf_ws(filepath, event_data):
-    # Set up the canvas
-    buffer = BytesIO()
-    pdf = canvas.Canvas(buffer, pagesize=letter)
-    width, height = letter
-    # Starting coordinates
-    start_x = 50
-    start_y = height - 50
-    line_height = 20
+# def generate_pdf_ws(filepath, event_data):
+#     # Set up the canvas
+#     buffer = BytesIO()
+#     pdf = canvas.Canvas(buffer, pagesize=letter)
+#     width, height = letter
+#     # Starting coordinates
+#     start_x = 50
+#     start_y = height - 50
+#     line_height = 20
 
-    # Outer border lines
-    top_line_y = start_y + 20  # Position for the top horizontal line
-    bottom_line_y = 50  # Position for the bottom horizontal line
-    pdf.line(start_x, top_line_y, width - start_x, top_line_y)  # Top horizontal line
-    pdf.line(start_x, top_line_y, start_x, bottom_line_y+182)  # Left vertical line
-    pdf.line(width - start_x, top_line_y, width - start_x, bottom_line_y+182)  # Right vertical line
+#     # Outer border lines
+#     top_line_y = start_y + 20  # Position for the top horizontal line
+#     bottom_line_y = 50  # Position for the bottom horizontal line
+#     pdf.line(start_x, top_line_y, width - start_x, top_line_y)  # Top horizontal line
+#     pdf.line(start_x, top_line_y, start_x, bottom_line_y+182)  # Left vertical line
+#     pdf.line(width - start_x, top_line_y, width - start_x, bottom_line_y+182)  # Right vertical line
 
-    # Title
-    pdf.setFont("Helvetica-Bold", 12)
-    start_y-=10
-    pdf.drawString(start_x + 10, start_y, "DAY 2                    DAY 3                    BOTH DAYS")
+#     # Title
+#     pdf.setFont("Helvetica-Bold", 12)
+#     start_y-=10
+#     pdf.drawString(start_x + 10, start_y, "DAY 2                    DAY 3                    BOTH DAYS")
 
-    # Circles (checkboxes)
-    pdf.circle(start_x + 62.5, start_y + 4, 5,fill=1 if event_data.get("day")=="day_2" else 0)
-    pdf.circle(start_x + 160, start_y + 4, 5,fill=1 if event_data.get("day")=="day_3" else 0)
-    pdf.circle(start_x + 300, start_y + 4, 5, fill=1 if event_data.get("day")=="both_days" else 0)
+#     # Circles (checkboxes)
+#     pdf.circle(start_x + 62.5, start_y + 4, 5,fill=1 if event_data.get("day")=="day_2" else 0)
+#     pdf.circle(start_x + 160, start_y + 4, 5,fill=1 if event_data.get("day")=="day_3" else 0)
+#     pdf.circle(start_x + 300, start_y + 4, 5, fill=1 if event_data.get("day")=="both_days" else 0)
 
-    # Table headers
-    start_y -= 20
-    pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
-    start_y -= 20
-    pdf.setFont("Helvetica", 10)
-    pdf.drawString(start_x + 10, start_y, f"EXPECTED NO. OF PARTICIPANTS:{event_data.get('participants','N/A')}")
-    start_y -= 20
-    pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
-    start_y -= line_height
-    pdf.drawString(start_x + 10, start_y, f"PROPOSING FEES:{event_data.get('proposing_fee','N/A')}")
-    pdf.drawString(start_x + 10, start_y - 20, f"Justification:{event_data.get('proposing_fees_justification','N/A')} ")
+#     # Table headers
+#     start_y -= 20
+#     pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
+#     start_y -= 20
+#     pdf.setFont("Helvetica", 10)
+#     pdf.drawString(start_x + 10, start_y, f"EXPECTED NO. OF PARTICIPANTS:{event_data.get('participants','N/A')}")
+#     start_y -= 20
+#     pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
+#     start_y -= line_height
+#     pdf.drawString(start_x + 10, start_y, f"PROPOSING FEES:{event_data.get('proposing_fee','N/A')}")
+#     pdf.drawString(start_x + 10, start_y - 20, f"Justification:{event_data.get('proposing_fees_justification','N/A')} ")
 
-    # Line separator
-    start_y -= 40
-    pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
+#     # Line separator
+#     start_y -= 40
+#     pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
 
-    start_y -= 20
-    pdf.drawString(start_x + 10, start_y, f"SPEAKER REMUNERATION (if any)(With justification):{event_data.get('speaker_remuneration','N/A')}")
-    start_y -= 40
-    pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
+#     start_y -= 20
+#     pdf.drawString(start_x + 10, start_y, f"SPEAKER REMUNERATION (if any)(With justification):{event_data.get('speaker_remuneration','N/A')}")
+#     start_y -= 40
+#     pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
 
-    # Number of Halls/Labs
-    start_y -= 30
-    pdf.drawString(start_x + 10, start_y, f"NUMBER OF HALLS/LABS REQUIRED:{event_data.get('halls_required','N/A')}")
-    start_y -= line_height
-    pdf.drawString(start_x + 10, start_y, f"HALLS/LABS PREFERRED:{event_data.get('preferred_halls','N/A')}")
-    start_y -= line_height
-    pdf.drawString(start_x + 10, start_y, f"Reason:{event_data.get('preferred_hall_reason','N/A')}")
-    start_y -= 50
-    pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
+#     # Number of Halls/Labs
+#     start_y -= 30
+#     pdf.drawString(start_x + 10, start_y, f"NUMBER OF HALLS/LABS REQUIRED:{event_data.get('halls_required','N/A')}")
+#     start_y -= line_height
+#     pdf.drawString(start_x + 10, start_y, f"HALLS/LABS PREFERRED:{event_data.get('preferred_halls','N/A')}")
+#     start_y -= line_height
+#     pdf.drawString(start_x + 10, start_y, f"Reason:{event_data.get('preferred_hall_reason','N/A')}")
+#     start_y -= 50
+#     pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
 
-    # Duration of the Event
-    start_y -= 20
-    pdf.drawString(start_x + 10, start_y, f"DURATION OF THE EVENT IN HOURS:{event_data.get('duration')}")
-    start_y -= 20
-    pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
+#     # Duration of the Event
+#     start_y -= 20
+#     pdf.drawString(start_x + 10, start_y, f"DURATION OF THE EVENT IN HOURS:{event_data.get('duration')}")
+#     start_y -= 20
+#     pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
 
-    # Time Slots
-    start_y -= 30
-    pdf.drawString(start_x + 10, start_y, "START TO END TIME")
-    pdf.drawString(start_x + 270, start_y, "SLOT 1          SLOT 2          FULL DAY")
-    pdf.circle(start_x + 285, start_y-15, 5,fill=1 if event_data.get("slot")=="slot1" else 0)
-    pdf.circle(start_x + 350, start_y-15, 5, fill=1 if event_data.get("slot")=="slot2" else 0)
-    pdf.circle(start_x + 420, start_y-15, 5, fill=1 if event_data.get("slot")=="slot3" else 0)
+#     # Time Slots
+#     start_y -= 30
+#     pdf.drawString(start_x + 10, start_y, "START TO END TIME")
+#     pdf.drawString(start_x + 270, start_y, "SLOT 1          SLOT 2          FULL DAY")
+#     pdf.circle(start_x + 285, start_y-15, 5,fill=1 if event_data.get("slot")=="slot1" else 0)
+#     pdf.circle(start_x + 350, start_y-15, 5, fill=1 if event_data.get("slot")=="slot2" else 0)
+#     pdf.circle(start_x + 420, start_y-15, 5, fill=1 if event_data.get("slot")=="slot3" else 0)
 
-    start_y -= line_height
-    pdf.drawString(start_x + 10, start_y, "SLOT 1 : 9:30 TO 12:30")
-    pdf.drawString(start_x + 10, start_y - line_height, "SLOT 2 : 1:30 TO 4:30")
-    start_y -= 2 * line_height + 10  # Adjust spacing after time slots
-    pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
-    center_x = width / 2  # Calculate the center of the page
-    top_y = start_y+100   # Y-position of the top horizontal line
-    bottom_y = start_y   # Y-position of the bottom horizontal line
-    pdf.line(center_x, top_y, center_x, bottom_y)
-    # Number Required
-    start_y -= 30  # Space before the "NUMBER REQUIRED" section
-    pdf.drawString(start_x + 10, start_y, f"NUMBER REQUIRED:{event_data.get('extension_boxes')}")
-    pdf.drawString(start_x + 300, start_y, f"1. EXTENSION BOX :{event_data.get('extension_reason')}")
-    start_y -= 30  # Space before the horizontal line
-    pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
-    start_y -= 40
-    pdf.drawString(start_x, start_y, "Signature of the Secretary:")
-    start_y -= 30
-    pdf.drawString(start_x,start_y, "Signature of the Faculty Advisor:")
-    pdf.drawCentredString(width / 2, height - 20, "Workshop Details")
+#     start_y -= line_height
+#     pdf.drawString(start_x + 10, start_y, "SLOT 1 : 9:30 TO 12:30")
+#     pdf.drawString(start_x + 10, start_y - line_height, "SLOT 2 : 1:30 TO 4:30")
+#     start_y -= 2 * line_height + 10  # Adjust spacing after time slots
+#     pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
+#     center_x = width / 2  # Calculate the center of the page
+#     top_y = start_y+100   # Y-position of the top horizontal line
+#     bottom_y = start_y   # Y-position of the bottom horizontal line
+#     pdf.line(center_x, top_y, center_x, bottom_y)
+#     # Number Required
+#     start_y -= 30  # Space before the "NUMBER REQUIRED" section
+#     pdf.drawString(start_x + 10, start_y, f"NUMBER REQUIRED:{event_data.get('extension_boxes')}")
+#     pdf.drawString(start_x + 300, start_y, f"1. EXTENSION BOX :{event_data.get('extension_reason')}")
+#     start_y -= 30  # Space before the horizontal line
+#     pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
+#     start_y -= 40
+#     pdf.drawString(start_x, start_y, "Signature of the Secretary:")
+#     start_y -= 30
+#     pdf.drawString(start_x,start_y, "Signature of the Faculty Advisor:")
+#     pdf.drawCentredString(width / 2, height - 20, "Workshop Details")
 
-    # Finalize and save the PDF
-    pdf.save()
-    buffer.seek(0)
-    with open(filepath, "wb") as f:
-        f.write(buffer.read())
+#     # Finalize and save the PDF
+#     pdf.save()
+#     buffer.seek(0)
+#     with open(filepath, "wb") as f:
+#         f.write(buffer.read())
 @app.route('/download_pdf2', methods=['GET'])
 def download_pdf2():
     try:
@@ -2064,105 +2060,105 @@ def download_pdf2():
         flash("An error occurred while generating the preview.")
         return redirect(url_for('workshop_page'))
 
-def generate_pdf_content_pp(filepath,event_data):
-    buffer = BytesIO()
-    pdf = canvas.Canvas(buffer, pagesize=letter)
-    width, height = letter
+# def generate_pdf_content_pp(filepath,event_data):
+#     buffer = BytesIO()
+#     pdf = canvas.Canvas(buffer, pagesize=letter)
+#     width, height = letter
 
-    # Set margin for text placement
-    margin = 60  # Left margin
-    content_width = width - 2 * margin
-    content_height = height - 2 * margin
-    pdf.drawCentredString(width / 2, height - 30, "Presentation Details")
-    # Draw a straightened horizontal line above the Day 1 contents
-    pdf.line(margin - 20, height - 50, width - margin, height - 50)
+#     # Set margin for text placement
+#     margin = 60  # Left margin
+#     content_width = width - 2 * margin
+#     content_height = height - 2 * margin
+#     pdf.drawCentredString(width / 2, height - 30, "Presentation Details")
+#     # Draw a straightened horizontal line above the Day 1 contents
+#     pdf.line(margin - 20, height - 50, width - margin, height - 50)
 
-    # Draw checkboxes for days (horizontally aligned)
-    pdf.drawString(margin, height - 70, "Day 1:")
-    # pdf.rect(margin + 40, height - 61, 10, 10, fill=1 if event_data.get("day")=="day_2" else 0)
-    pdf.rect(margin + 41, height - 71, 10, 10,  fill=1 if event_data.get("day")=="day_2" else 0)
+#     # Draw checkboxes for days (horizontally aligned)
+#     pdf.drawString(margin, height - 70, "Day 1:")
+#     # pdf.rect(margin + 40, height - 61, 10, 10, fill=1 if event_data.get("day")=="day_2" else 0)
+#     pdf.rect(margin + 41, height - 71, 10, 10,  fill=1 if event_data.get("day")=="day_2" else 0)
 
-    pdf.drawString(margin + 80, height - 70, "Day 2:")
-    # pdf.rect(margin + 130, height - 61, 10, 10, fill=1 if event_data.get("day")=="day_3" else 0)
-    pdf.rect(margin + 120, height - 71, 10, 10, fill=1 if event_data.get("day")=="day_3" else 0 )
+#     pdf.drawString(margin + 80, height - 70, "Day 2:")
+#     # pdf.rect(margin + 130, height - 61, 10, 10, fill=1 if event_data.get("day")=="day_3" else 0)
+#     pdf.rect(margin + 120, height - 71, 10, 10, fill=1 if event_data.get("day")=="day_3" else 0 )
 
-    pdf.drawString(margin + 170, height - 70, "Both Days:")
-    # pdf.rect(margin + 250, height - 61, 10, 10, fill=1 if event_data.get("day")=="both_days" else 0)
-    pdf.rect(margin + 239, height - 71, 10, 10,fill=1 if event_data.get("day")=="both_days" else 0 )
-    # Draw a line after the checkboxes
-    pdf.line(margin - 20, height - 80, width - margin, height - 80)
+#     pdf.drawString(margin + 170, height - 70, "Both Days:")
+#     # pdf.rect(margin + 250, height - 61, 10, 10, fill=1 if event_data.get("day")=="both_days" else 0)
+#     pdf.rect(margin + 239, height - 71, 10, 10,fill=1 if event_data.get("day")=="both_days" else 0 )
+#     # Draw a line after the checkboxes
+#     pdf.line(margin - 20, height - 80, width - margin, height - 80)
 
-    # Draw vertical lines from the top horizontal line to the bottom horizontal line
-    pdf.line(margin - 20, height - 50, margin - 20, height - 570)  # Left vertical line
-    pdf.line(width - margin, height - 50, width - margin, height - 570)  # Right vertical line
+#     # Draw vertical lines from the top horizontal line to the bottom horizontal line
+#     pdf.line(margin - 20, height - 50, margin - 20, height - 570)  # Left vertical line
+#     pdf.line(width - margin, height - 50, width - margin, height - 570)  # Right vertical line
 
-    # Draw text fields for event data
-    pdf.drawString(margin, height - 110, f"Expected No. of Participants:{event_data.get('expected_participants', '')} ")
-    pdf.drawString(margin, height - 140, f"Team Size: Min:{event_data.get('team_size_min', '')}")
+#     # Draw text fields for event data
+#     pdf.drawString(margin, height - 110, f"Expected No. of Participants:{event_data.get('expected_participants', '')} ")
+#     pdf.drawString(margin, height - 140, f"Team Size: Min:{event_data.get('team_size_min', '')}")
 
-    # pdf.drawString(margin, height - 110, f"Expected No. of Participants: {event_data.get('participants', '')}")
-    # pdf.drawString(margin, height - 140, f"Team Size: Min: {event_data.get('teamSizeMin', '')}, Max: {event_data.get('teamSizeMax', '')}")
-    pdf.drawString(margin, height - 170, f"Team Size: Max:{event_data.get('team_size_max', '')}")
-    # Draw a line after participants and team size
-    pdf.line(margin - 20, height - 190, width - margin, height - 190)
+#     # pdf.drawString(margin, height - 110, f"Expected No. of Participants: {event_data.get('participants', '')}")
+#     # pdf.drawString(margin, height - 140, f"Team Size: Min: {event_data.get('teamSizeMin', '')}, Max: {event_data.get('teamSizeMax', '')}")
+#     pdf.drawString(margin, height - 170, f"Team Size: Max:{event_data.get('team_size_max', '')}")
+#     # Draw a line after participants and team size
+#     pdf.line(margin - 20, height - 190, width - margin, height - 190)
 
-    pdf.drawString(margin, height - 220, f"Number of Halls/Labs Required:{event_data.get('halls_required', '')} ")
-    # pdf.drawString(margin, height - 170, f"Number of Halls/Labs Required: {event_data.get('hallsRequired', '')}")
+#     pdf.drawString(margin, height - 220, f"Number of Halls/Labs Required:{event_data.get('halls_required', '')} ")
+#     # pdf.drawString(margin, height - 170, f"Number of Halls/Labs Required: {event_data.get('hallsRequired', '')}")
 
-    pdf.drawString(margin, height - 250, f"Halls/Labs Preferred:{event_data.get('preferred_halls', '')}")
-    # pdf.drawString(margin + 20, height - 270, event_data.get("hallsPreferred", ""))
+#     pdf.drawString(margin, height - 250, f"Halls/Labs Preferred:{event_data.get('preferred_halls', '')}")
+#     # pdf.drawString(margin + 20, height - 270, event_data.get("hallsPreferred", ""))
 
-    pdf.drawString(margin, height - 280, f"Reason for Multiple Halls:{event_data.get('hall_reason', '')}")
-    # pdf.drawString(margin + 20, height - 220, event_data.get("hallReason", ""))
+#     pdf.drawString(margin, height - 280, f"Reason for Multiple Halls:{event_data.get('hall_reason', '')}")
+#     # pdf.drawString(margin + 20, height - 220, event_data.get("hallReason", ""))
 
-    # Draw a line after halls and reasons
-    # pdf.line(margin - 20, height - 230, width - margin, height - 230)
+#     # Draw a line after halls and reasons
+#     # pdf.line(margin - 20, height - 230, width - margin, height - 230)
 
 
-    # Draw a line after halls preferred
-    pdf.line(margin - 20, height - 310, width - margin, height - 310)
+#     # Draw a line after halls preferred
+#     pdf.line(margin - 20, height - 310, width - margin, height - 310)
 
-    # Draw radio buttons for duration
-    pdf.drawString(margin, height - 330, f"Duration of the Event in Hours:{event_data.get('duration', '')}")
-    pdf.drawString(margin + 20, height - 350, "Slot 1: 9:30 to 12:30")
-    pdf.circle(margin + 160, height - 345, 5,  fill=1 if event_data.get("time_slot") == "slot_1" else 0)
-    pdf.drawString(margin + 20, height - 370, "Slot 2: 1:30 to 4:30")
-    pdf.circle(margin + 160, height - 365, 5, fill=1 if event_data.get("time_slot") == "slot_2" else 0 )
-    pdf.drawString(margin + 20, height - 390, "Full Day")
-    pdf.circle(margin + 160, height - 385, 5, fill=1 if event_data.get("time_slot") == "full_day" else 0 )
+#     # Draw radio buttons for duration
+#     pdf.drawString(margin, height - 330, f"Duration of the Event in Hours:{event_data.get('duration', '')}")
+#     pdf.drawString(margin + 20, height - 350, "Slot 1: 9:30 to 12:30")
+#     pdf.circle(margin + 160, height - 345, 5,  fill=1 if event_data.get("time_slot") == "slot_1" else 0)
+#     pdf.drawString(margin + 20, height - 370, "Slot 2: 1:30 to 4:30")
+#     pdf.circle(margin + 160, height - 365, 5, fill=1 if event_data.get("time_slot") == "slot_2" else 0 )
+#     pdf.drawString(margin + 20, height - 390, "Full Day")
+#     pdf.circle(margin + 160, height - 385, 5, fill=1 if event_data.get("time_slot") == "full_day" else 0 )
 
-    # pdf.drawString(margin, height - 300, "Duration of the Event in Hours:")
-    # pdf.drawString(margin + 20, height - 320, "Slot 1: 9:30 to 12:30")
-    # pdf.circle(margin + 160, height - 315, 5, fill=1 if event_data.get("duration") == "slot1" else 0)
-    # pdf.drawString(margin + 20, height - 340, "Slot 2: 1:30 to 4:30")
-    # pdf.circle(margin + 160, height - 335, 5, fill=1 if event_data.get("duration") == "slot2" else 0)
-    # pdf.drawString(margin + 20, height - 360, "Full Day")
-    # pdf.circle(margin + 160, height - 355, 5, fill=1 if event_data.get("duration") == "fullDay" else 0)
-    # Draw a line after the duration radio buttons
-    pdf.line(margin - 20, height - 410, width - margin, height - 410)
+#     # pdf.drawString(margin, height - 300, "Duration of the Event in Hours:")
+#     # pdf.drawString(margin + 20, height - 320, "Slot 1: 9:30 to 12:30")
+#     # pdf.circle(margin + 160, height - 315, 5, fill=1 if event_data.get("duration") == "slot1" else 0)
+#     # pdf.drawString(margin + 20, height - 340, "Slot 2: 1:30 to 4:30")
+#     # pdf.circle(margin + 160, height - 335, 5, fill=1 if event_data.get("duration") == "slot2" else 0)
+#     # pdf.drawString(margin + 20, height - 360, "Full Day")
+#     # pdf.circle(margin + 160, height - 355, 5, fill=1 if event_data.get("duration") == "fullDay" else 0)
+#     # Draw a line after the duration radio buttons
+#     pdf.line(margin - 20, height - 410, width - margin, height - 410)
 
-    pdf.drawString(margin, height - 440, f"Number Required:{event_data.get('extension_boxes', '')}")
-    # pdf.drawString(margin, height - 390, f"Number Required: {event_data.get('numberRequired', '')}")
-    pdf.drawString(margin, height - 470, f"Reason for Number:{event_data.get('extension_box_reason', '')}")
-    # pdf.drawString(margin + 20, height - 440, event_data.get("numberReason", ""))
+#     pdf.drawString(margin, height - 440, f"Number Required:{event_data.get('extension_boxes', '')}")
+#     # pdf.drawString(margin, height - 390, f"Number Required: {event_data.get('numberRequired', '')}")
+#     pdf.drawString(margin, height - 470, f"Reason for Number:{event_data.get('extension_box_reason', '')}")
+#     # pdf.drawString(margin + 20, height - 440, event_data.get("numberReason", ""))
 
-    # Draw a line after number and reason
-    pdf.line(margin - 20, height - 500, width - margin, height - 500)
+#     # Draw a line after number and reason
+#     pdf.line(margin - 20, height - 500, width - margin, height - 500)
 
-    pdf.drawString(margin, height - 525, f"Extension Box: ")
-    # pdf.drawString(margin, height - 470, f"Extension Box: {event_data.get('extensionBox', '')}")
+#     pdf.drawString(margin, height - 525, f"Extension Box: ")
+#     # pdf.drawString(margin, height - 470, f"Extension Box: {event_data.get('extensionBox', '')}")
 
-    # Draw a line after the extension box
-    pdf.line(margin - 20, height - 570, width - margin, height - 570)
+#     # Draw a line after the extension box
+#     pdf.line(margin - 20, height - 570, width - margin, height - 570)
 
-    # Draw signature fields
-    pdf.drawString(margin-15, height - 610, f"Signature of the Secretary: ")
-    pdf.drawString(margin-15, height - 640, f"Signature of the Faculty Advisor: ")
+#     # Draw signature fields
+#     pdf.drawString(margin-15, height - 610, f"Signature of the Secretary: ")
+#     pdf.drawString(margin-15, height - 640, f"Signature of the Faculty Advisor: ")
 
-    pdf.save()
-    buffer.seek(0)
-    with open(filepath, "wb") as f:
-        f.write(buffer.read())
+#     pdf.save()
+#     buffer.seek(0)
+#     with open(filepath, "wb") as f:
+#         f.write(buffer.read())
 
 
 

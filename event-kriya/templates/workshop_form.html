@@ -40,9 +40,7 @@
             const sessionCount = parseInt(this.value);
             for (let i = 0; i < sessionCount; i++) {
                 const sessionHTML = `
-                    <h3>Session ${i + 1}</h3>
-                    <label for="session_no_${i}">Session No:</label>
-                    <input type="number" id="session_no_${i}" name="session_no_${i}" required><br><br>
+                    
 
                     <label for="session_time_${i}">Session Time:</label>
                     <input type="text" id="session_time_${i}" name="session_time_${i}" required><br><br>
@@ -73,7 +71,7 @@
             const sessionCount = parseInt(workshopData.session_count);
             for (let i = 0; i < sessionCount; i++) {
                 workshopData.sessions.push({
-                    session_no: document.getElementById(`session_no_${i}`).value,
+
                     session_time: document.getElementById(`session_time_${i}`).value,
                     session_topic: document.getElementById(`session_topic_${i}`).value,
                     session_description: document.getElementById(`session_description_${i}`).value
@@ -102,8 +100,7 @@
                 for (let i = 0; i < sessionCount; i++) {
                     const sessionHTML = `
                         <h3>Session ${i + 1}</h3>
-                        <label for="session_no_${i}">Session No:</label>
-                        <input type="number" id="session_no_${i}" name="session_no_${i}" value="${workshopData.sessions[i].session_no}" required><br><br>
+                        
 
                         <label for="session_time_${i}">Session Time:</label>
                         <input type="text" id="session_time_${i}" name="session_time_${i}" value="${workshopData.sessions[i].session_time}" required><br><br>

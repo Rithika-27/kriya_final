@@ -57,7 +57,7 @@ tbody tr:hover {
 
 /* Button Styles */
 button {
-    background-color: #F9A825;
+    background-color: #f925a4;
     color: white;
     padding: 10px 20px;
     font-size: 16px;
@@ -72,7 +72,7 @@ button {
 }
 
 button:hover {
-    background-color: #F7C600;
+    background-color: #f925a4;
 }
 
 /* Error/Empty State Messages */
