@@ -21,12 +21,17 @@
     </header>
 
     <!-- Search Bar Section -->
+    <!-- Search Bar Section -->
     <section class="search-section">
-      <form method="GET" action="{{ url_for('search_event') }}">
-        <input type="text" name="id" class="search-bar" placeholder="search here..." required>
-        <button type="submit" class="search-button">Search</button>
+      <form method="GET" action="{{ url_for('search_event') }}" class="search-form">
+        <div class="search-bar-container">
+          <input type="text" name="id" class="search-bar" placeholder="search here..." required>
+          <button type="submit" class="search-button">Search</button>
+          <a href="/login" class="login-button">Login</a>
+        </div>
       </form>
     </section>
+
 
     <!-- Main Cards Section -->
     <main>

@@ -2159,6 +2159,22 @@ def download_pdf2():
 #     buffer.seek(0)
 #     with open(filepath, "wb") as f:
 #         f.write(buffer.read())
+USERNAME='admin'
+PASSWORD='admin'
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        # Validate username and password
+        if username == USERNAME and password == PASSWORD:
+            return redirect(url_for('home'))  # Redirect to a protected page
+        else:
+            flash("Invalid username or password!", "error")  # Flash error message
+
+    return render_template('login.html')
 
 
 
