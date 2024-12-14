@@ -122,9 +122,9 @@ def save_workshop():
         # Update only the fields present in the form data
         updated_workshop['association_name'] = workshop_data.get('association_name', existing_workshop['association_name'])
         updated_workshop['workshop_name'] = workshop_data.get('workshop_name', existing_workshop['workshop_name'])
-        updated_workshop['description'] = workshop_data.get('description', existing_workshop['description'])
-        updated_workshop['prerequisites'] = workshop_data.get('prerequisites', existing_workshop['prerequisites'])
-        updated_workshop['session_count'] = int(workshop_data.get('session_count', existing_workshop['session_count']))
+        updated_workshop['workshop']['description'] = workshop_data.get('description', existing_workshop['workshop']['description'])
+        updated_workshop['workshop']['prerequisites'] = workshop_data.get('prerequisites', existing_workshop['workshop']['prerequisites'])
+        updated_workshop['workshop']['session_count'] = int(workshop_data.get('session_count', existing_workshop['workshop']['session_count']))
 
         # Update details
         for key, value in existing_workshop['details'].items():
@@ -165,7 +165,7 @@ def save_event():
 
         # Update only the fields present in the form data
         updated_event['association_name'] = event_data.get('association_name', existing_event['association_name'])
-        updated_event['event']['name'] = event_data.get('event_name', existing_event['event']['name'])
+        updated_event['event_name'] = event_data.get('event_name', existing_event['event_name'])
         updated_event['event']['tagline'] = event_data.get('tagline', existing_event['event']['tagline'])
         updated_event['event']['about'] = event_data.get('about', existing_event['event']['about'])
         updated_event['event']['round_count'] = int(event_data.get('round_count', existing_event['event']['round_count']))
