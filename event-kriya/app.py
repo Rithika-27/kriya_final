@@ -24,6 +24,213 @@ event_collection = db["event-entries"]
 workshop_collection=db["workshop-entries"]
 presentation_collection=db["presentation-entries"]
 
+
+USERNAME = 'admin'
+PASSWORD = 'admin'
+# Main route for home
+
+
+# Home route (index page)
+@app.route('/index')
+def index():
+    if not session.get('logged_in'):  # Check if the user is logged in
+        return redirect(url_for('login'))  # If not logged in, redirect to login page
+    return render_template('index.html')
+
+# Login route
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        # Validate username and password
+        if username == USERNAME and password == PASSWORD:
+            session['logged_in'] = True  # Set the session to indicate the user is logged in
+            return redirect(url_for('index'))  # Redirect to the index page (home)
+        else:
+            flash("Invalid username or password!", "error")  # Flash error message
+
+    return render_template('login.html')
+
+# Logout route
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)  # Remove the 'logged_in' session variable
+    return redirect(url_for('login'))  # Redirect to login page
+
+@app.route('/search_event_admin', methods=['GET', 'POST'])
+def search_event_admin():
+    if request.method == 'POST':
+        event_id = request.form.get('event_id')  # Correct way to get event_id from form data
+  
+        if not event_id:
+            return render_template('index.html', error="Please enter an ID to search.")
+
+        # Check if the search ID starts with "WKSP" for workshop
+        if event_id.startswith("WKSP"):
+            # Fetch workshop data from the database
+            workshop = workshop_collection.find_one({"workshop_id": event_id})
+            if workshop:
+                return render_template('edit_workshop.html', workshop=workshop, error=None)
+            else:
+                return render_template('edit_workshop.html', workshop=None, error="Workshop not found.")
+
+        # Check if the search ID starts with "EVNT" for event
+        elif event_id.startswith("EVNT"):
+            # Fetch event data from the database
+            event = event_collection.find_one({"event_id": event_id})
+            if event:
+                return render_template('edit_event.html', event=event, error=None)
+            else:
+                return render_template('edit_event.html', event=None, error="Event not found.")
+
+        # Check if the search ID starts with "PPST" for presentation
+        elif event_id.startswith("PPST"):
+            # Fetch presentation data from the database
+            presentation = presentation_collection.find_one({"presentation_id": event_id})
+            if presentation:
+                return render_template('edit_presentation.html', presentation=presentation, error=None)
+            else:
+                return render_template('edit_presentation.html', presentation=None, error="Presentation not found.")
+
+        # If the ID format is invalid
+        return render_template('index.html', error="Invalid ID format. Please enter a valid Event ID, Workshop ID, or Presentation ID.")
+
+    # Render the search form page for GET requests
+    return render_template('search_event.html')  
+
+@app.route('/save_workshop', methods=['POST'])
+def save_workshop():
+    try:
+        # Parse form data
+        workshop_data = request.form
+
+        # Get the workshop ID (assumed to be a unique identifier)
+        workshop_id = workshop_data.get('workshop_id')
+        if not workshop_id:
+            return jsonify({"error": "Workshop ID is required."}), 400
+
+        # Fetch the existing workshop data from the database
+        existing_workshop = workshop_collection.find_one({"workshop_id": workshop_id})
+        if not existing_workshop:
+            return jsonify({"error": "Workshop not found."}), 404
+
+        # Prepare the updated data
+        updated_workshop = existing_workshop.copy()
+
+        # Update only the fields present in the form data
+        updated_workshop['association_name'] = workshop_data.get('association_name', existing_workshop['association_name'])
+        updated_workshop['workshop_name'] = workshop_data.get('workshop_name', existing_workshop['workshop_name'])
+        updated_workshop['description'] = workshop_data.get('description', existing_workshop['description'])
+        updated_workshop['prerequisites'] = workshop_data.get('prerequisites', existing_workshop['prerequisites'])
+        updated_workshop['session_count'] = int(workshop_data.get('session_count', existing_workshop['session_count']))
+
+        # Update details
+        for key, value in existing_workshop['details'].items():
+            updated_workshop['details'][key] = workshop_data.get(f'details_{key}', value)
+
+        # Update form fields
+        for key, value in existing_workshop['form'].items():
+            updated_workshop['form'][key] = workshop_data.get(f'form_{key}', value)
+
+        # Update the database with the modified workshop data
+        workshop_collection.replace_one({"workshop_id": workshop_id}, updated_workshop)
+
+        return jsonify({"message": "Workshop updated successfully."}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# Save event route
+@app.route('/save_event', methods=['POST'])
+def save_event():
+    try:
+        # Parse form data
+        event_data = request.form
+
+        # Get the event ID (assumed to be a unique identifier)
+        event_id = event_data.get('event_id')
+        if not event_id:
+            return jsonify({"error": "Event ID is required."}), 400
+
+        # Fetch the existing event data from the database
+        existing_event = event_collection.find_one({"event_id": event_id})
+        if not existing_event:
+            return jsonify({"error": "Event not found."}), 404
+
+        # Prepare the updated data
+        updated_event = existing_event.copy()
+
+        # Update only the fields present in the form data
+        updated_event['association_name'] = event_data.get('association_name', existing_event['association_name'])
+        updated_event['event']['name'] = event_data.get('event_name', existing_event['event']['name'])
+        updated_event['event']['tagline'] = event_data.get('tagline', existing_event['event']['tagline'])
+        updated_event['event']['about'] = event_data.get('about', existing_event['event']['about'])
+        updated_event['event']['round_count'] = int(event_data.get('round_count', existing_event['event']['round_count']))
+
+        # Update details
+        for key, value in existing_event['details'].items():
+            updated_event['details'][key] = event_data.get(f'details_{key}', value)
+
+        # Update form fields
+        for key, value in existing_event['form'].items():
+            updated_event['form'][key] = event_data.get(f'form_{key}', value)
+
+        # Update the database with the modified event data
+        event_collection.replace_one({"event_id": event_id}, updated_event)
+
+        return jsonify({"message": "Event updated successfully."}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/save_presentation', methods=['POST'])
+def save_presentation():
+    try:
+        # Parse form data
+        presentation_data = request.form
+
+        # Get the presentation ID (assumed to be a unique identifier)
+        presentation_id = presentation_data.get('presentation_id')
+        if not presentation_id:
+            return jsonify({"error": "Presentation ID is required."}), 400
+
+        # Fetch the existing presentation data from the database
+        existing_presentation = presentation_collection.find_one({"presentation_id": presentation_id})
+        if not existing_presentation:
+            return jsonify({"error": "Presentation not found."}), 404
+
+        # Prepare the updated data
+        updated_presentation = existing_presentation.copy()
+
+        # Update association and presentation details
+        updated_presentation['association_name'] = presentation_data.get('association_name', existing_presentation['association_name'])
+        updated_presentation['presentation_name'] = presentation_data.get('presentation_name', existing_presentation['presentation_name'])
+
+        # Update details section
+        updated_presentation['details'] = {}
+        for key, value in existing_presentation['details'].items():
+            updated_presentation['details'][key] = presentation_data.get(f'details[{key}]', value)
+
+        # Update presentation information
+        updated_presentation['presentation']['event_description'] = presentation_data.get('event_description', existing_presentation['presentation']['event_description'])
+        updated_presentation['presentation']['topics_and_theme'] = presentation_data.get('topics_and_theme', existing_presentation['presentation']['topics_and_theme'])
+        updated_presentation['presentation']['event_rules'] = presentation_data.get('event_rules', existing_presentation['presentation']['event_rules'])
+
+        # Update form details
+        updated_presentation['form'] = {}
+        for key, value in existing_presentation['form'].items():
+            updated_presentation['form'][key] = presentation_data.get(f'form[{key}]', value)
+
+        # Update the database with the modified presentation data
+        presentation_collection.replace_one({"presentation_id": presentation_id}, updated_presentation)
+
+        return jsonify({"message": "Presentation updated successfully."}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 # Main route for home
 @app.route('/')
 def home():
@@ -1100,9 +1307,9 @@ def submit_presentation():
         existing_event = presentation_collection.find_one(sort=[("presentation_id", -1)])
         if existing_event and "presentation_id" in existing_event:
             last_event_num = int(existing_event["presentation_id"][4:])
-            presentation_id = f"PPST{last_event_num + 1:02d}"
+            presentation_id = f"PRPN{last_event_num + 1:02d}"
         else:
-            presentation_id = "PPST01"
+            presentation_id = "PRPN01"
 
         # Prepare the event entry for the database
         presentation_entry = {
@@ -2159,22 +2366,7 @@ def download_pdf2():
 #     buffer.seek(0)
 #     with open(filepath, "wb") as f:
 #         f.write(buffer.read())
-USERNAME='admin'
-PASSWORD='admin'
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        
-        # Validate username and password
-        if username == USERNAME and password == PASSWORD:
-            return redirect(url_for('home'))  # Redirect to a protected page
-        else:
-            flash("Invalid username or password!", "error")  # Flash error message
-
-    return render_template('login.html')
 
 
 
