@@ -24,13 +24,15 @@ event_collection = db["event-entries"]
 workshop_collection=db["workshop-entries"]
 presentation_collection=db["presentation-entries"]
 
-USERNAME = 'admin'
-PASSWORD = 'admin'
-# Main route for home
 @app.route('/')
 def home():
     # session.clear()  # Clear all session data for a new event
     return render_template('home.html')
+
+USERNAME = 'admin'
+PASSWORD = 'admin'
+# Main route for home
+
 
 # Home route (index page)
 @app.route('/index')
@@ -61,11 +63,11 @@ def logout():
     session.pop('logged_in', None)  # Remove the 'logged_in' session variable
     return redirect(url_for('login'))  # Redirect to login page
 
-@app.route('/search_event', methods=['GET', 'POST'])
+@app.route('/search_event_admin', methods=['GET', 'POST'])
 def search_event_admin():
     if request.method == 'POST':
-        event_id = request.form.get('event_id')  # Get the event_id from the form
-
+        event_id = request.form.get('event_id')  # Correct way to get event_id from form data
+  
         if not event_id:
             return render_template('index.html', error="Please enter an ID to search.")
 
@@ -102,45 +104,242 @@ def search_event_admin():
     # Render the search form page for GET requests
     return render_template('search_event.html')  
 
+
 # Save event route
 @app.route('/save_event', methods=['POST'])
 def save_event():
     try:
         # Parse form data
         event_data = request.form
-
-        # Get the event ID (assumed to be a unique identifier)
         event_id = event_data.get('event_id')
+
         if not event_id:
             return jsonify({"error": "Event ID is required."}), 400
 
-        # Fetch the existing event data from the database
+        # Fetch the existing event
         existing_event = event_collection.find_one({"event_id": event_id})
         if not existing_event:
             return jsonify({"error": "Event not found."}), 404
 
-        # Prepare the updated data
+        # Prepare updated event data
         updated_event = existing_event.copy()
+        updated_event['association_name'] = event_data.get('association_name', existing_event.get('association_name'))
+        updated_event['event']['tagline'] = event_data.get('tagline', existing_event['event'].get('tagline'))
+        updated_event['event']['about'] = event_data.get('about', existing_event['event'].get('about'))
 
-        # Update only the fields present in the form data
-        updated_event['association_name'] = event_data.get('association_name', existing_event['association_name'])
-        updated_event['event']['name'] = event_data.get('event_name', existing_event['event']['name'])
-        updated_event['event']['tagline'] = event_data.get('tagline', existing_event['event']['tagline'])
-        updated_event['event']['about'] = event_data.get('about', existing_event['event']['about'])
-        updated_event['event']['round_count'] = int(event_data.get('round_count', existing_event['event']['round_count']))
+        
 
-        # Update details
+        # Update details and form
+        updated_event['details'] = {}
         for key, value in existing_event['details'].items():
-            updated_event['details'][key] = event_data.get(f'details_{key}', value)
-
-        # Update form fields
-        for key, value in existing_event['form'].items():
+            updated_event['details'][key] = event_data.get(f'details[{key}]', value)
+        for key, value in existing_event.get('form', {}).items():
             updated_event['form'][key] = event_data.get(f'form_{key}', value)
 
-        # Update the database with the modified event data
+        # Handle Items: Add, Edit, Remove
+        updated_items = []
+        item_index = 0
+        while True:
+            item_name = event_data.get(f'items[{item_index}][item_name]')
+            if item_name is None:
+                break  # Exit loop if no more items are present in the form
+
+            item_quantity = event_data.get(f'items[{item_index}][quantity]')
+            item_price_per_unit = event_data.get(f'items[{item_index}][price_per_unit]')
+
+            if item_name.strip() and item_quantity.isdigit() and item_price_per_unit.replace('.', '', 1).isdigit():
+                item_quantity = int(item_quantity)
+                item_price_per_unit = float(item_price_per_unit)
+                total_price = item_quantity * item_price_per_unit
+
+                updated_items.append({
+                    "item_name": item_name.strip(),
+                    "quantity": item_quantity,
+                    "price_per_unit": item_price_per_unit,
+                    "total_price": total_price
+                })
+            item_index += 1
+
+        # Always update items (even if the list is empty, this clears removed items)
+        updated_event['items'] = updated_items
+
+        # Handle Rounds: Add, Edit, Remove
+        # Validate round_count
+        round_count = event_data.get('round_count')
+        updated_event['event']['round_count'] = int(round_count) if round_count else existing_event['event'].get('round_count', 0)
+        updated_rounds = []
+        round_index = 0
+        while True:
+            round_name = event_data.get(f'rounds[{round_index}][round_name]')
+            if round_name is None:
+                break  # Exit loop if no more rounds are present in the form
+
+            round_description = event_data.get(f'rounds[{round_index}][round_description]', '').strip()
+            round_rules = event_data.get(f'rounds[{round_index}][round_rules]', '').strip()
+
+            # Only include valid rounds
+            if round_name.strip():
+                updated_rounds.append({
+                    "round_name": round_name.strip(),
+                    "round_description": round_description,
+                    "round_rules": round_rules
+                })
+            round_index += 1
+
+        # Always update rounds (even if the list is empty, this clears removed rounds)
+        updated_event['event']['rounds'] = updated_rounds
+
+        # Save to database
         event_collection.replace_one({"event_id": event_id}, updated_event)
 
         return jsonify({"message": "Event updated successfully."}), 200
+
+    except Exception as e:
+        app.logger.error(f"Error in save_event: {e}")
+        return jsonify({"error": "Internal server error."}), 500
+@app.route('/save_workshop', methods=['POST'])
+def save_workshop():
+    try:
+        # Parse form data
+        workshop_data = request.form
+
+        # Get the workshop ID (assumed to be a unique identifier)
+        workshop_id = workshop_data.get('workshop_id')
+        if not workshop_id:
+            return jsonify({"error": "Workshop ID is required."}), 400
+
+        # Fetch the existing workshop data from the database
+        existing_workshop = workshop_collection.find_one({"workshop_id": workshop_id})
+        if not existing_workshop:
+            return jsonify({"error": "Workshop not found."}), 404
+
+        # Prepare the updated data
+        updated_workshop = existing_workshop.copy()
+
+        # Update only the fields present in the form data
+        updated_workshop['association_name'] = workshop_data.get('association_name', existing_workshop['association_name'])
+        updated_workshop['workshop_name'] = workshop_data.get('workshop_name', existing_workshop['workshop_name'])
+        updated_workshop['workshop']['description'] = workshop_data.get('description', existing_workshop['workshop']['description'])
+        updated_workshop['workshop']['prerequisites'] = workshop_data.get('prerequisites', existing_workshop['workshop']['prerequisites'])
+        updated_workshop['workshop']['session_count'] = int(workshop_data.get('session_count', existing_workshop['workshop']['session_count']))
+
+        # Update details
+        for key, value in existing_workshop['details'].items():
+            updated_workshop['details'][key] = workshop_data.get(f'details_{key}', value)
+
+        # Update form fields
+        updated_workshop['form'] = {}
+        for key, value in existing_workshop['form'].items():
+            updated_workshop['form'][key] = workshop_data.get(f'form[{key}]', value)
+
+
+        # Handle Items: Add, Edit, Remove
+        updated_items = []
+        item_index = 0
+        while True:
+            item_name = workshop_data.get(f'items[{item_index}][item_name]')
+            if item_name is None:
+                break  # Exit loop if no more items are present in the form
+
+            item_quantity = workshop_data.get(f'items[{item_index}][quantity]')
+            item_price_per_unit = workshop_data.get(f'items[{item_index}][price_per_unit]')
+
+            if item_name.strip() and item_quantity.isdigit() and item_price_per_unit.replace('.', '', 1).isdigit():
+                item_quantity = int(item_quantity)
+                item_price_per_unit = float(item_price_per_unit)
+                total_price = item_quantity * item_price_per_unit
+
+                updated_items.append({
+                    "item_name": item_name.strip(),
+                    "quantity": item_quantity,
+                    "price_per_unit": item_price_per_unit,
+                    "total_price": total_price
+                })
+            item_index += 1
+
+        # Always update items (even if the list is empty, this clears removed items)
+        updated_workshop['items'] = updated_items
+
+
+        updated_rounds = []
+        round_index = 0
+        while True:
+            session_time = workshop_data.get(f'sessions[{round_index}][session_time]')
+            if session_time is None:
+                break  # Exit loop if no more rounds are present in the form
+
+            session_description = workshop_data.get(f'sessions[{round_index}][session_description]', '').strip()
+            session_topic = workshop_data.get(f'sessions[{round_index}][session_topic]', '').strip()
+
+            # Only include valid rounds
+            if session_time.strip():
+                updated_rounds.append({
+                    "session_time": session_time.strip(),
+                    "session_description": session_description,
+                    "session_topic": session_topic
+                })
+            round_index += 1
+
+        # Always update rounds (even if the list is empty, this clears removed rounds)
+        updated_workshop['workshop']['sessions'] = updated_rounds
+
+
+        # Log the updated sessions and items
+        print("Updated Sessions:", updated_rounds)
+        print("Updated Items:", updated_items)
+        
+
+        # Update the database with the modified workshop data
+        workshop_collection.replace_one({"workshop_id": workshop_id}, updated_workshop)
+
+        return jsonify({"message": "Workshop updated successfully."}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/save_presentation', methods=['POST'])
+def save_presentation():
+    try:
+        # Parse form data
+        presentation_data = request.form
+
+        # Get the presentation ID (assumed to be a unique identifier)
+        presentation_id = presentation_data.get('presentation_id')
+        if not presentation_id:
+            return jsonify({"error": "Presentation ID is required."}), 400
+
+        # Fetch the existing presentation data from the database
+        existing_presentation = presentation_collection.find_one({"presentation_id": presentation_id})
+        if not existing_presentation:
+            return jsonify({"error": "Presentation not found."}), 404
+
+        # Prepare the updated data
+        updated_presentation = existing_presentation.copy()
+
+        # Update association and presentation details
+        updated_presentation['association_name'] = presentation_data.get('association_name', existing_presentation['association_name'])
+        updated_presentation['presentation_name'] = presentation_data.get('presentation_name', existing_presentation['presentation_name'])
+
+        # Update details section
+        updated_presentation['details'] = {}
+        for key, value in existing_presentation['details'].items():
+            updated_presentation['details'][key] = presentation_data.get(f'details[{key}]', value)
+
+        # Update presentation information
+        updated_presentation['presentation']['event_description'] = presentation_data.get('event_description', existing_presentation['presentation']['event_description'])
+        updated_presentation['presentation']['topics_and_theme'] = presentation_data.get('topics_and_theme', existing_presentation['presentation']['topics_and_theme'])
+        updated_presentation['presentation']['event_rules'] = presentation_data.get('event_rules', existing_presentation['presentation']['event_rules'])
+
+        # Update form details
+        updated_presentation['form'] = {}
+        for key, value in existing_presentation['form'].items():
+            updated_presentation['form'][key] = presentation_data.get(f'form[{key}]', value)
+
+        # Update the database with the modified presentation data
+        presentation_collection.replace_one({"presentation_id": presentation_id}, updated_presentation)
+
+        return jsonify({"message": "Presentation updated successfully."}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

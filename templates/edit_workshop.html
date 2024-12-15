@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Workshop Details</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/a.css') }}">
+</head>
+<script>
+    // Function to add a new item row
+    function addItemRow() {
+        const itemsTable = document.getElementById("itemsTable");
+        const rowIndex = itemsTable.rows.length - 1; // Adjusting for the header row
+        const newRow = itemsTable.insertRow(rowIndex);
+        newRow.innerHTML = `
+            <td><input type="text" name="items[${rowIndex}][item_name]" placeholder="Item Name"></td>
+            <td><input type="number" name="items[${rowIndex}][quantity]" placeholder="Quantity"></td>
+            <td><input type="number" name="items[${rowIndex}][price_per_unit]" placeholder="Price per unit"></td>
+            <td><input type="number" name="items[${rowIndex}][total_price]" placeholder="Total Price"></td>
+            <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+        `;
+    }
+
+    // Function to add a new round row
+    function addRoundRow() {
+        const roundsTable = document.getElementById("roundsTable");
+        const rowIndex = roundsTable.rows.length - 1; // Adjusting for the header row
+        const newRow = roundsTable.insertRow(rowIndex);
+        newRow.innerHTML = `
+            <td><input type="text" name="sessions[${rowIndex}][session_time]" placeholder="Session time"></td>
+            <td><textarea name="sessions[${rowIndex}][session_description]" placeholder="session Description"></textarea></td>
+            <td><textarea name="sessions[${rowIndex}][session_topic]" placeholder="Session Topic"></textarea></td>
+            <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+        `;
+    }
+
+    // Function to remove a row
+    function removeRow(button) {
+        const row = button.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+    }
+</script>
+
+<body>
+    <h1>Workshop Details</h1>
+
+    {% if error %}
+    <p style="color: red;">{{ error }}</p>
+    <a href="/workshop_search">Back to Search</a>
+    {% elif workshop %}
+    <form action="{{ url_for('save_workshop') }}" method="post">
+        <input type="hidden" name="workshop_id" value="{{ workshop.workshop_id }}">
+
+        <table>
+            <tr>
+                <th>Field</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td><strong>Association Name</strong></td>
+                <td><input type="text" name="association_name" value="{{ workshop.association_name }}" required></td>
+            </tr>
+            <tr>
+                <td><strong>Workshop Name</strong></td>
+                <td><input type="text" name="workshop_name" value="{{ workshop.workshop_name }}" required></td>
+            </tr>
+            <tr>
+                <td><strong>Description</strong></td>
+                <td><textarea name="description" required>{{ workshop.workshop.description }}</textarea></td>
+            </tr>
+            <tr>
+                <td><strong>Prerequisites</strong></td>
+                <td><textarea name="prerequisites">{{ workshop.workshop.prerequisites }}</textarea></td>
+            </tr>
+            <tr>
+                <td><strong>Session Count</strong></td>
+                <td><input type="number" name="session_count" value="{{ workshop.workshop.session_count }}" required>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Session</strong></td>
+                <td>
+                    <table id="roundsTable">
+                        <tr>
+                            <th>Session Time</th>
+                            <th>Session Description</th>
+                            <th>Session topic</th>
+                            <th>Actions</th>
+                        </tr>
+                        {% for session in workshop.workshop.sessions %}
+                        <tr>
+                            <td><input type="text" name="sessions[{{ loop.index0 }}][session_time]"
+                                    value="{{ session.session_time }}"></td>
+                            <td><textarea
+                                    name="sessions[{{ loop.index0 }}][session_description]">{{ session.session_description }}</textarea>
+                            </td>
+                            <td><textarea
+                                    name="sessions[{{ loop.index0 }}][session_topic]">{{ session.session_topic }}</textarea>
+                            </td>
+                            <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                    <button type="button" onclick="addRoundRow()">Add Round</button>
+                </td>
+            </tr>
+
+            {% if workshop.details %}
+            <tr>
+                <td><strong>Details</strong></td>
+                <td>
+                    <table>
+                        <tr>
+                            <th>Field</th>
+                            <th>Value</th>
+                        </tr>
+                        {% for key, value in workshop.details.items() %}
+                        <tr>
+                            <td>{{ key.replace('_', ' ') | title }}</td>
+                            <td><input type="text" name="details_{{ key }}" value="{{ value }}"></td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="2">No details available</td>
+            </tr>
+            {% endif %}
+
+            <!-- Form Details -->
+            <tr>
+                <td><strong>Form</strong></td>
+                <td>
+                    <table>
+                        <tr>
+                            <th>Field</th>
+                            <th>Value</th>
+                        </tr>
+
+                        <!-- Day Field Mapping -->
+
+                        {% set dayMapping = {'day_1': 'Day 1', 'day_2': 'Day 2', 'day_3': 'Day 3', 'two_days': 'Two
+                        Days'} %}
+                        {% set selectedDay = dayMapping.get(workshop.form.day, 'N/A') %}
+                        <tr>
+                            <td>Day</td>
+                            <td>
+                                <select name="form[day]">
+                                    <option value="day_1" {% if selectedDay=='Day 1' %}selected{% endif %}>Day 1
+                                    </option>
+                                    <option value="day_2" {% if selectedDay=='Day 2' %}selected{% endif %}>Day 2
+                                    </option>
+                                    <option value="day_3" {% if selectedDay=='Day 3' %}selected{% endif %}>Day 3
+                                    </option>
+                                    <option value="two_days" {% if selectedDay=='Two Days' %}selected{% endif %}>Two
+                                        Days</option>
+                                </select>
+                            </td>
+                        </tr>
+
+                        <!-- Additional Form Fields -->
+                        {% for key, value in workshop.form.items() %}
+                        {% if key != 'day' %}
+                        <tr>
+                            <td>{{ key.replace('_', ' ') | title }}</td>
+                            <td><input type="text" name="form[{{ key }}]" value="{{ value }}"></td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </table>
+                </td>
+            </tr>
+            <!-- Dynamic Items -->
+            <tr>
+                <td><strong>Items</strong></td>
+                <td>
+                    <table id="itemsTable">
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Quantity</th>
+                            <th>Price per unit</th>
+                            <th>Total price</th>
+                            <th>Actions</th>
+                        </tr>
+                        {% for item in workshop['items'] %}
+                        <tr>
+                            <td><input type="text" name="items[{{ loop.index0 }}][item_name]"
+                                    value="{{ item['item_name'] }}"></td>
+                            <td><input type="number" name="items[{{ loop.index0 }}][quantity]"
+                                    value="{{ item['quantity'] }}">
+                            </td>
+                            <td><input type="number" name="items[{{ loop.index0 }}][price_per_unit]"
+                                    value="{{ item['price_per_unit'] }}"></td>
+                            <td><input type="number" name="items[{{ loop.index0 }}][total_price]"
+                                    value="{{ item['total_price'] }}"></td>
+                            <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                    <button type="button" onclick="addItemRow()">Add Item</button>
+                </td>
+            </tr>
+
+        </table>
+
+        <!-- Submit Button -->
+        <button type="submit" class="button">Save Changes</button>
+    </form>
+    {% else %}
+    <p>No event found.</p>
+
+    {% endif %}
+</body>
+
+</html>
