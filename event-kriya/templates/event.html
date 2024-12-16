@@ -88,7 +88,7 @@
             const storedData = JSON.parse(localStorage.getItem('eventFormData'));
             if (storedData) {
                 Object.keys(storedData).forEach(key => {
-                    const element = document.querySelector([name = "${key}"]);
+                    const element = document.querySelector(`[name = "${key}"]`);
                     if (element) {
                         if (element.type === 'checkbox' || element.type === 'radio') {
                             element.checked = storedData[key];

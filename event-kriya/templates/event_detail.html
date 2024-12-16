@@ -29,16 +29,18 @@
             // Navigate to the next page (event.html)
             window.location.href = './event';
         }
+
+        // Retrieve and populate the form with stored event details
         window.onload = function () {
             const storedEventDetails = localStorage.getItem("eventDetails");
 
             if (storedEventDetails) {
                 const eventDetails = JSON.parse(storedEventDetails);
 
-                // Populate all input fields
+                // Populate all input fields with the stored data
                 const form = document.getElementById("eventDetailsForm");
                 for (const [key, value] of Object.entries(eventDetails)) {
-                    const input = form.querySelector([name = "${key}"]);
+                    const input = form.querySelector(`[name="${key}"]`);
                     if (input) {
                         input.value = value;
                     }
@@ -98,7 +100,7 @@
                     <th>Mobile No</th>
                     <td><input type="text" name="convenor1_mobile" pattern="\d{10}"
                             title="Please enter a 10-digit mobile number." required>
-                    </td>></td>
+                    </td>
                 </tr>
                 <tr>
                     <th>Name (Convenor 2)</th>

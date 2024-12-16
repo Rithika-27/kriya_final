@@ -55,20 +55,18 @@
     </div>
 
     <script>
-        // Function to generate round input fields dynamically
+        // Function to dynamically generate round input fields
         function generateRounds() {
             const roundNo = document.getElementById('round_no').value;
             const roundsBody = document.getElementById('roundsBody');
             const roundsSection = document.getElementById('roundsSection');
 
-            // Show or hide the rounds section based on valid input
             if (!roundNo || roundNo <= 0) {
                 roundsBody.innerHTML = ''; // Clear existing rows
                 roundsSection.style.display = 'none';
                 return;
             }
 
-            // Show the section and generate rows
             roundsSection.style.display = 'block';
             roundsBody.innerHTML = ''; // Clear existing rows
 
@@ -83,25 +81,21 @@
             }
         }
 
-        // Listen for changes in the number of rounds field
         document.getElementById('round_no').addEventListener('input', generateRounds);
 
-        // Load saved data from localStorage on page load
+        // Load saved data from localStorage
         function loadFromLocalStorage() {
             const savedData = localStorage.getItem('presentationData');
             if (savedData) {
                 try {
                     const eventDetails = JSON.parse(savedData);
-
-                    // Repopulate the form fields
                     document.getElementById('event_description').value = eventDetails.event_description || '';
                     document.getElementById('topics_and_theme').value = eventDetails.topics_and_theme || '';
                     document.getElementById('event_rules').value = eventDetails.event_rules || '';
 
-                    // Repopulate the number of rounds
                     const rounds = eventDetails.rounds || [];
                     document.getElementById('round_no').value = rounds.length || '';
-                    generateRounds(); // Generate round fields dynamically
+                    generateRounds();
                     rounds.forEach((round, index) => {
                         const roundIndex = index + 1;
                         document.getElementById(`round_${roundIndex}_time`).value = round.time || '';
@@ -132,7 +126,6 @@
                 rounds: rounds
             };
 
-            // Save to local storage
             try {
                 localStorage.setItem('presentationData', JSON.stringify(eventDetails));
                 alert('Event details saved successfully!');
@@ -140,11 +133,9 @@
                 alert('Error saving event details to localStorage.');
             }
 
-            // Redirect to preview page
             window.location.href = "/presentation_preview";
         }
 
-        // Call the function on page load
         window.onload = loadFromLocalStorage;
     </script>
 </body>

@@ -29,20 +29,26 @@
             // Navigate to the next page (workshop.html)
             window.location.href = './workshop';
         }
+
         window.onload = function () {
-            const storedWorkshopDetails = localStorage.getItem("workshopDetails");
+            // Check if localStorage is available
+            if (typeof(Storage) !== "undefined") {
+                const storedWorkshopDetails = localStorage.getItem("workshopDetails");
 
-            if (storedWorkshopDetails) {
-                const workshopDetails = JSON.parse(storedWorkshopDetails);
+                if (storedWorkshopDetails) {
+                    const workshopDetails = JSON.parse(storedWorkshopDetails);
 
-                // Populate all input fields
-                const form = document.getElementById("workshopDetailsForm");
-                for (const [key, value] of Object.entries(workshopDetails)) {
-                    const input = form.querySelector([name = "${key}"]);
-                    if (input) {
-                        input.value = value;
+                    // Populate all input fields
+                    const form = document.getElementById("workshopDetailsForm");
+                    for (const [key, value] of Object.entries(workshopDetails)) {
+                        const input = form.querySelector(`[name=${key}]`);
+                        if (input) {
+                            input.value = value;
+                        }
                     }
                 }
+            } else {
+                alert("Local Storage is not supported in this browser.");
             }
         };
     </script>
@@ -97,8 +103,7 @@
                 <tr>
                     <th>Mobile No</th>
                     <td><input type="text" name="convenor1_mobile" pattern="\d{10}"
-                            title="Please enter a 10-digit mobile number." required>
-                    </td>></td>
+                            title="Please enter a 10-digit mobile number." required></td>
                 </tr>
                 <tr>
                     <th>Name (Convenor 2)</th>
@@ -164,7 +169,7 @@
                 </tr>
             </table>
 
-            <!-- Judge Details -->
+            <!-- Speaker Details -->
             <h3>Speaker Details:</h3>
             <table>
                 <tr>

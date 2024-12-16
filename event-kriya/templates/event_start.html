@@ -65,6 +65,30 @@
             font-size: 18px;
         }
     </style>
+    <script>
+        window.onload = function () {
+            // Check if data is already stored in localStorage
+            const associationName = localStorage.getItem('association_name') || "PSG Tech Students Union";
+            const eventName = localStorage.getItem('event_name') || "KRIYA 2K24 Event";
+
+            // Display event details in the page
+            document.getElementById("associationName").textContent = associationName;
+            document.getElementById("eventName").textContent = eventName;
+        }
+
+        function storeEventDetails() {
+            // Get the values from input or form
+            const associationName = "PSG Tech Students Union"; // For example, you can replace this with dynamic data
+            const eventName = "KRIYA 2K24 Event"; // Similarly, replace with dynamic event name
+
+            // Store them in localStorage
+            localStorage.setItem('association_name', associationName);
+            localStorage.setItem('event_name', eventName);
+
+            // Reload page to reflect the changes (optional)
+            location.reload();
+        }
+    </script>
 </head>
 
 <body>
@@ -86,10 +110,13 @@
         <h3>KRIYA 2K24</h3>
         <h3>Event Resource Form</h3>
         <h3>Event</h3>
+
+        <!-- Button to Store Event Details in localStorage -->
+        <button onclick="storeEventDetails()">Store Event Details</button>
     </div>
     <div class="details">
-        <p><span>ASSOCIATION NAME</span> : {{ association_name }}</p>
-        <p><span>EVENT NAME</span> : {{event_name }}</p>
+        <p><span>ASSOCIATION NAME</span> : <span id="associationName"></span></p>
+        <p><span>EVENT NAME</span> : <span id="eventName"></span></p>
     </div>
 </body>
 

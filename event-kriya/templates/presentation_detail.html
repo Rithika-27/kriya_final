@@ -13,12 +13,12 @@
             const formData = new FormData(form);
             const presentationDetails = {};
 
-            // Collect form data and create an object
+            // Collect form data into an object
             formData.forEach((value, key) => {
                 presentationDetails[key] = value;
             });
 
-            // Save presentation details to localStorage
+            // Save to localStorage
             try {
                 localStorage.setItem('presentationDetails', JSON.stringify(presentationDetails));
                 alert('Presentation details saved successfully!');
@@ -30,16 +30,17 @@
             window.location.href = './presentation';
         }
 
+        // Load saved data on page load
         window.onload = function () {
             const storedPresentationDetails = localStorage.getItem("presentationDetails");
 
             if (storedPresentationDetails) {
                 const presentationDetails = JSON.parse(storedPresentationDetails);
 
-                // Populate all input fields
+                // Populate all input fields with stored values
                 const form = document.getElementById("presentationDetailsForm");
                 for (const [key, value] of Object.entries(presentationDetails)) {
-                    const input = form.querySelector([name = "${key}"]);
+                    const input = form.querySelector(`[name="${key}"]`);
                     if (input) {
                         input.value = value;
                     }
@@ -66,8 +67,7 @@
                 </tr>
                 <tr>
                     <th>Mobile No</th>
-                    <td><input type="text" name="secretary1_mobile" pattern="\d{10}"
-                            title="Please enter a 10-digit mobile number." required></td>
+                    <td><input type="text" name="secretary1_mobile" pattern="\d{10}" title="Enter a 10-digit mobile number." required></td>
                 </tr>
                 <tr>
                     <th>Name (Secretary 2)</th>
@@ -79,8 +79,7 @@
                 </tr>
                 <tr>
                     <th>Mobile No</th>
-                    <td><input type="text" name="secretary2_mobile" pattern="\d{10}"
-                            title="Please enter a 10-digit mobile number." required></td>
+                    <td><input type="text" name="secretary2_mobile" pattern="\d{10}" title="Enter a 10-digit mobile number." required></td>
                 </tr>
             </table>
 
@@ -97,8 +96,7 @@
                 </tr>
                 <tr>
                     <th>Mobile No</th>
-                    <td><input type="text" name="convenor1_mobile" pattern="\d{10}"
-                            title="Please enter a 10-digit mobile number." required></td>
+                    <td><input type="text" name="convenor1_mobile" pattern="\d{10}" title="Enter a 10-digit mobile number." required></td>
                 </tr>
                 <tr>
                     <th>Name (Convenor 2)</th>
@@ -110,8 +108,7 @@
                 </tr>
                 <tr>
                     <th>Mobile No</th>
-                    <td><input type="text" name="convenor2_mobile" pattern="\d{10}"
-                            title="Please enter a 10-digit mobile number." required></td>
+                    <td><input type="text" name="convenor2_mobile" pattern="\d{10}" title="Enter a 10-digit mobile number." required></td>
                 </tr>
             </table>
 
@@ -128,8 +125,7 @@
                 </tr>
                 <tr>
                     <th>Mobile No</th>
-                    <td><input type="text" name="volunteer1_mobile" pattern="\d{10}"
-                            title="Please enter a 10-digit mobile number." required></td>
+                    <td><input type="text" name="volunteer1_mobile" pattern="\d{10}" title="Enter a 10-digit mobile number." required></td>
                 </tr>
                 <tr>
                     <th>Name (Volunteer 2)</th>
@@ -141,8 +137,7 @@
                 </tr>
                 <tr>
                     <th>Mobile No</th>
-                    <td><input type="text" name="volunteer2_mobile" pattern="\d{10}"
-                            title="Please enter a 10-digit mobile number." required></td>
+                    <td><input type="text" name="volunteer2_mobile" pattern="\d{10}" title="Enter a 10-digit mobile number." required></td>
                 </tr>
             </table>
 
@@ -159,8 +154,7 @@
                 </tr>
                 <tr>
                     <th>Contact Details</th>
-                    <td><input type="text" name="faculty_advisor_contact" pattern="\d{10}"
-                            title="Please enter a 10-digit mobile number." required></td>
+                    <td><input type="text" name="faculty_advisor_contact" pattern="\d{10}" title="Enter a 10-digit mobile number." required></td>
                 </tr>
             </table>
 
@@ -177,8 +171,7 @@
                 </tr>
                 <tr>
                     <th>Contact Details</th>
-                    <td><input type="text" name="judge_contact" pattern="\d{10}"
-                            title="Please enter a 10-digit mobile number." required></td>
+                    <td><input type="text" name="judge_contact" pattern="\d{10}" title="Enter a 10-digit mobile number." required></td>
                 </tr>
             </table>
 

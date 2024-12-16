@@ -2,18 +2,52 @@
 <html>
 
 <head>
-    <title>Event Details</title>
+    <title>Edit Event Details</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/preview.css') }}">
+    <script>
+        // Function to add a new item row
+        function addItemRow() {
+            const itemsTable = document.getElementById("itemsTable");
+            const rowIndex = itemsTable.rows.length - 1; // Adjusting for the header row
+            const newRow = itemsTable.insertRow(rowIndex);
+            newRow.innerHTML = `
+                <td><input type="text" name="items[${rowIndex}][item_name]" placeholder="Item Name"></td>
+                <td><input type="number" name="items[${rowIndex}][quantity]" placeholder="Quantity"></td>
+                <td><input type="number" name="items[${rowIndex}][price_per_unit]" placeholder="Price per unit"></td>
+                <td><input type="number" name="items[${rowIndex}][total_price]" placeholder="Total Price"></td>
+                <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+            `;
+        }
+
+        // Function to add a new round row
+        function addRoundRow() {
+            const roundsTable = document.getElementById("roundsTable");
+            const rowIndex = roundsTable.rows.length - 1; // Adjusting for the header row
+            const newRow = roundsTable.insertRow(rowIndex);
+            newRow.innerHTML = `
+                <td><input type="text" name="rounds[${rowIndex}][round_name]" placeholder="Round Name"></td>
+                <td><textarea name="rounds[${rowIndex}][round_description]" placeholder="Round Description"></textarea></td>
+                <td><textarea name="rounds[${rowIndex}][round_rules]" placeholder="Round Rules"></textarea></td>
+                <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+            `;
+        }
+
+        // Function to remove a row
+        function removeRow(button) {
+            const row = button.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+        }
+    </script>
 </head>
 
 <body>
-    <h1>Event Details</h1>
+    <h1>Edit Event Details</h1>
 
     {% if error %}
     <p style="color: red;">{{ error }}</p>
     <a href="/event_search">Back to Search</a>
     {% elif event %}
-    <form action="/save_event" method="POST">
+    <form action="/save_event" method="post">
         <table>
             <tr>
                 <th>Field</th>
@@ -21,33 +55,57 @@
             </tr>
             <tr>
                 <td><strong>Association Name</strong></td>
-                <td><input type="text" name="association_name" value="{{ event.association_name }}" required></td>
-            </tr>
-            <tr>
-                <td><strong>Event Name</strong></td>
-                <td><input type="text" name="event_name" value="{{ event.event_name }}" required></td>
+                <td><input type="text" name="association_name" value="{{ event.association_name }}"></td>
             </tr>
             <tr>
                 <td><strong>Event ID</strong></td>
                 <td><input type="text" name="event_id" value="{{ event.event_id }}" readonly></td>
             </tr>
-            <!-- <tr>
+            <tr>
                 <td><strong>Event Name</strong></td>
-                <td><input type="text" name="event_name" value="{{ event.event.name }}" required></td>
-            </tr> -->
+                <td><input type="text" name="event_name" value="{{ event.event.name }}"></td>
+            </tr>
             <tr>
                 <td><strong>Tagline</strong></td>
-                <td><input type="text" name="tagline" value="{{ event.event.tagline }}" required></td>
+                <td><input type="text" name="tagline" value="{{ event.event.tagline }}"></td>
             </tr>
             <tr>
                 <td><strong>About</strong></td>
-                <td><textarea name="about" required>{{ event.event.about }}</textarea></td>
+                <td><textarea name="about">{{ event.event.about }}</textarea></td>
             </tr>
             <tr>
                 <td><strong>Round Count</strong></td>
-                <td><input type="number" name="round_count" value="{{ event.event.round_count }}" required></td>
+                <td><input type="number" name="round_count" value="{{ event.event.round_count }}"></td>
             </tr>
 
+            <!-- Display Rounds -->
+            <tr>
+                <td><strong>Rounds</strong></td>
+                <td>
+                    <table id="roundsTable">
+                        <tr>
+                            <th>Round Name</th>
+                            <th>Round Description</th>
+                            <th>Round Rules</th>
+                            <th>Actions</th>
+                        </tr>
+                        {% for round in event.event.rounds %}
+                        <tr>
+                            <td><input type="text" name="rounds[{{ loop.index0 }}][round_name]"
+                                    value="{{ round.round_name }}"></td>
+                            <td><textarea
+                                    name="rounds[{{ loop.index0 }}][round_description]">{{ round.round_description }}</textarea>
+                            </td>
+                            <td><textarea
+                                    name="rounds[{{ loop.index0 }}][round_rules]">{{ round.round_rules }}</textarea>
+                            </td>
+                            <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                    <button type="button" onclick="addRoundRow()">Add Round</button>
+                </td>
+            </tr>
             <!-- Display Details -->
             <tr>
                 <td><strong>Details</strong></td>
@@ -60,20 +118,16 @@
                         {% for key, value in event.details.items() %}
                         <tr>
                             <td>{{ key.replace('_', ' ') | title }}</td>
-                            <td><input type="text" name="details_{{ key }}" value="{{ value }}" required></td>
+                            <td><input type="text" name="details[{{ key }}]" value="{{ value }}"></td>
                         </tr>
                         {% endfor %}
                     </table>
                 </td>
             </tr>
 
-            <!-- Display Form -->
+            <!-- Form Fields -->
             <tr>
-                <td><strong>Form</strong><br>(SLOT:Type in the same format<br> e.g., slot1, slot2,
-                    full_day)<br></br>(DAYS:Type
-                    in the
-                    same format<br>
-                    e.g., day_1, day_2, day_3, two_days)</td>
+                <td><strong>Form</strong></td>
                 <td>
                     <table>
                         <tr>
@@ -108,7 +162,9 @@
                         <tr>
                             <td>Day</td>
                             <td>
-                                <input type="text" name="days" value="{{ selectedDay | join(', ') }}">
+                                <input type="text"
+                                    name="days(Type in the same format e.g., day_1, day_2, day_3, two_days)"
+                                    value="{{ selectedDay | join(', ') }}">
                                 <p style="font-size: small; color: gray;"></p>
                             </td>
                         </tr>
@@ -127,7 +183,8 @@
                         <tr>
                             <td>Slot</td>
                             <td>
-                                <input type="text" name="slot" value="{{ selectedSlot | join(', ') }}">
+                                <input type="text" name="slot(Type in the same format e.g., slot1, slot2, full_day)"
+                                    value="{{ selectedSlot | join(', ') }}">
                                 <p style="font-size: small; color: gray;"></p>
                             </td>
                         </tr>
@@ -146,13 +203,47 @@
                     </table>
                 </td>
             </tr>
+
+            <!-- Dynamic Items -->
+            <tr>
+                <td><strong>Items</strong></td>
+                <td>
+                    <table id="itemsTable">
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Quantity</th>
+                            <th>Price per unit</th>
+                            <th>Total price</th>
+                            <th>Actions</th>
+                        </tr>
+                        {% for item in event['items'] %}
+                        <tr>
+                            <td><input type="text" name="items[{{ loop.index0 }}][item_name]"
+                                    value="{{ item['item_name'] }}"></td>
+                            <td><input type="number" name="items[{{ loop.index0 }}][quantity]"
+                                    value="{{ item['quantity'] }}">
+                            </td>
+                            <td><input type="number" name="items[{{ loop.index0 }}][price_per_unit]"
+                                    value="{{ item['price_per_unit'] }}"></td>
+                            <td><input type="number" name="items[{{ loop.index0 }}][total_price]"
+                                    value="{{ item['total_price'] }}"></td>
+                            <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                    <button type="button" onclick="addItemRow()">Add Item</button>
+                </td>
+            </tr>
+
         </table>
 
-        <!-- Save Button -->
-        <button type="submit" class="button">Save</button>
+        <button type="submit" class="button">Save Changes</button>
     </form>
+
+    <a href="/event_search">Search Again</a>
     {% else %}
-    <p>No event found.</p>
+    <p>No data to display.</p>
+    <a href="/event_search">Back to Search</a>
     {% endif %}
 </body>
 
