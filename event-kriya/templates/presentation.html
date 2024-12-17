@@ -5,15 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/presentation.css') }}">
-    <title>Presentation Details Form</title>
+    <title>Event Details Form</title>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.querySelector('form');
+            const numericInputs = document.querySelectorAll('input[type="number"]');
             const hallsRequiredInput = document.querySelector('input[name="halls_required"]');
             const hallsReasonInput = document.querySelector('input[name="hall_reason"]');
-            const numericInputs = document.querySelectorAll('input[type="number"]');
 
-            // Prevent negative numbers
+            // Prevent negative numbers in numeric inputs
             numericInputs.forEach(input => {
                 input.addEventListener('input', () => {
                     if (input.value < 0) {
@@ -23,12 +23,9 @@
                 });
             });
 
-            // Enable/disable "Reason for Preferred Halls" based on the number of halls required
+            // Enable or disable "Reason for Halls" field based on the number of halls required
             hallsRequiredInput.addEventListener('input', () => {
                 hallsReasonInput.disabled = !(parseInt(hallsRequiredInput.value) > 1);
-                if (hallsReasonInput.disabled) {
-                    hallsReasonInput.value = '';
-                }
             });
 
             // Form submission handler
@@ -47,36 +44,31 @@
                     }
                 });
 
-                // Validate "Reason for Halls" if more than one hall is required
+                // Validation for Halls > 1 reason
                 if (parseInt(formData['halls_required']) > 1 && !formData['hall_reason']) {
                     alert('Please provide a reason for requiring multiple halls.');
                     return;
                 }
 
-                // Save data to localStorage
+                // Save the form data to localStorage
                 localStorage.setItem('presentationFormData', JSON.stringify(formData));
                 alert('Form submitted successfully!');
-                window.location.href = './presentation_form'; // Adjust the redirect URL as needed
+                window.location.href = './presentation_form'; // Adjust as needed
             });
 
-            // Load data from localStorage on page load
+            // Load saved data from localStorage
             const storedData = JSON.parse(localStorage.getItem('presentationFormData'));
             if (storedData) {
                 Object.keys(storedData).forEach(key => {
-                    const element = document.querySelector(`[name="${key}"]`);
+                    const element = document.querySelector(`[name = "${key}"]`);
                     if (element) {
-                        if (element.type === 'radio' || element.type === 'checkbox') {
+                        if (element.type === 'checkbox' || element.type === 'radio') {
                             element.checked = storedData[key];
                         } else {
                             element.value = storedData[key];
                         }
                     }
                 });
-
-                // Enable "Reason for Preferred Halls" if applicable
-                if (parseInt(storedData['halls_required']) > 1) {
-                    hallsReasonInput.disabled = false;
-                }
             }
         });
     </script>
@@ -183,5 +175,6 @@
         </form>
     </div>
 </body>
+
 
 </html>

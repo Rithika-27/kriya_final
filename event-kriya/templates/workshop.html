@@ -106,7 +106,7 @@
             const storedData = JSON.parse(localStorage.getItem('workshopFormData'));
             if (storedData) {
                 Object.keys(storedData).forEach(key => {
-                    const element = document.querySelector(`[name="${key}"]`);
+                    const element = document.querySelector([name = "${key}"]);
                     if (element) {
                         if (element.type === 'checkbox' || element.type === 'radio') {
                             element.checked = storedData[key];
@@ -234,21 +234,18 @@
                     <th colspan="4"><input type="number" name="halls_required" placeholder="Specify halls required">
                     </th>
                 </tr>
-                <tr>
-                    <th>Reason for Halls</th>
-                    <th colspan="4"><input type="text" name="hall_reason" placeholder="Specify reason for halls"
-                            disabled></textarea></th>
-                </tr>
+
                 <tr>
                     <th>Preferred Halls</th>
                     <th colspan="4"><input type="text" name="preferred_halls" placeholder="Specify preferred halls">
                     </th>
                 </tr>
                 <tr>
-                    <th>Reason for Preferred Halls</th>
-                    <th colspan="4"><input type="text" name="preferred_hall_reason"
-                            placeholder="Specify reason for preferred halls"></textarea></th>
+                    <th>Reason for Halls</th>
+                    <th colspan="4"><input type="text" name="hall_reason" placeholder="Specify reason for halls"
+                            disabled></textarea></th>
                 </tr>
+
 
                 <!-- Slot -->
                 <tr>

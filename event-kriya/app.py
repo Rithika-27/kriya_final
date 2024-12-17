@@ -676,7 +676,7 @@ def view_preview():
         pdf_filepaths.append(pdf_filepath_page_6)
 
         # Merge the PDFs
-        merged_pdf_filename = f"{event_id}_combined.pdf"
+        merged_pdf_filename = f"{event_id}.pdf"
         merged_pdf_filepath = os.path.join('static', 'uploads', merged_pdf_filename)
 
         # Use PdfMerger to combine PDFs
@@ -744,8 +744,8 @@ def generate_and_save_pdf_page4(filepath, event_data):
 
     # Vertical lines
     vertical_line_x = margin + padding
-    pdf.line(margin, height - 40, margin, height - 520)
-    pdf.line(width - margin, height - 40, width - margin, height - 520)
+    pdf.line(margin, height - 40, margin, height - 540)
+    pdf.line(width - margin, height - 40, width - margin, height - 540)
 
     y_pos = height - 60
 
@@ -1159,7 +1159,7 @@ def view_preview_ws():
 
 
         # Merge the PDFs
-        merged_pdf_filename = f"{workshop_id}_combined.pdf"
+        merged_pdf_filename = f"{workshop_id}.pdf"
         merged_pdf_filepath = os.path.join('static', 'uploads', merged_pdf_filename)
 
         # Use PdfMerger to combine PDFs
@@ -1202,8 +1202,8 @@ def generate_pdf_ws(filepath, event_data):
     top_line_y = start_y + 20  # Position for the top horizontal line
     bottom_line_y = 50  # Position for the bottom horizontal line
     pdf.line(start_x, top_line_y, width - start_x, top_line_y)  # Top horizontal line
-    pdf.line(start_x, top_line_y, start_x, bottom_line_y+182)  # Left vertical line
-    pdf.line(width - start_x, top_line_y, width - start_x, bottom_line_y+182)  # Right vertical line
+    pdf.line(start_x, top_line_y, start_x, bottom_line_y+167)  # Left vertical line
+    pdf.line(width - start_x, top_line_y, width - start_x, bottom_line_y+167)  # Right vertical line
 
     # Title
     pdf.setFont("Helvetica-Bold", 12)
@@ -1243,7 +1243,7 @@ def generate_pdf_ws(filepath, event_data):
     start_y -= line_height
     pdf.drawString(start_x + 10, start_y, f"HALLS/LABS PREFERRED:{event_data.get('preferred_halls','N/A')}")
     start_y -= line_height
-    pdf.drawString(start_x + 10, start_y, f"Reason:{event_data.get('preferred_hall_reason','N/A')}")
+    pdf.drawString(start_x + 10, start_y, f"Reason:{event_data.get('hall_reason','N/A')}")
     start_y -= 50
     pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
 
@@ -1259,7 +1259,7 @@ def generate_pdf_ws(filepath, event_data):
     pdf.drawString(start_x + 270, start_y, "SLOT 1          SLOT 2          FULL DAY")
     pdf.circle(start_x + 285, start_y-15, 5,fill=1 if event_data.get("slot")=="slot1" else 0)
     pdf.circle(start_x + 350, start_y-15, 5, fill=1 if event_data.get("slot")=="slot2" else 0)
-    pdf.circle(start_x + 420, start_y-15, 5, fill=1 if event_data.get("slot")=="slot3" else 0)
+    pdf.circle(start_x + 420, start_y-15, 5, fill=1 if event_data.get("slot")=="full_day" else 0)
 
     start_y -= line_height
     pdf.drawString(start_x + 10, start_y, "SLOT 1 : 9:30 TO 12:30")
@@ -1271,9 +1271,10 @@ def generate_pdf_ws(filepath, event_data):
     bottom_y = start_y   # Y-position of the bottom horizontal line
     pdf.line(center_x, top_y, center_x, bottom_y)
     # Number Required
-    start_y -= 30  # Space before the "NUMBER REQUIRED" section
-    pdf.drawString(start_x + 10, start_y, f"NUMBER REQUIRED:{event_data.get('extension_boxes')}")
-    pdf.drawString(start_x + 300, start_y, f"1. EXTENSION BOX :{event_data.get('extension_reason')}")
+    start_y -= 25  # Space before the "NUMBER REQUIRED" section
+    pdf.drawString(start_x + 10, start_y, f"NUMBER REQUIRED: {event_data.get('extension_boxes')}")
+    start_y-=20
+    pdf.drawString(start_x + 10, start_y, f"EXTENSION BOX : {event_data.get('extension_reason')}")
     start_y -= 30  # Space before the horizontal line
     pdf.line(start_x, start_y, width - start_x, start_y)  # Horizontal line
     start_y -= 40
@@ -1287,7 +1288,6 @@ def generate_pdf_ws(filepath, event_data):
     buffer.seek(0)
     with open(filepath, "wb") as f:
         f.write(buffer.read())
-
 
 
 @app.route('/presentation-info', methods=['GET', 'POST'])
@@ -1570,7 +1570,7 @@ def view_preview_pp():
 
 
         # Merge the PDFs
-        merged_pdf_filename = f"{presentation_id}_combined.pdf"
+        merged_pdf_filename = f"{presentation_id}.pdf"
         merged_pdf_filepath = os.path.join('static', 'uploads', merged_pdf_filename)
 
         # Use PdfMerger to combine PDFs
@@ -1630,22 +1630,22 @@ def generate_pdf_content_pp(filepath,event_data):
     pdf.line(width - margin, height - 50, width - margin, height - 570)  # Right vertical line
 
     # Draw text fields for event data
-    pdf.drawString(margin, height - 110, f"Expected No. of Participants:{event_data.get('expected_participants', '')} ")
-    pdf.drawString(margin, height - 140, f"Team Size: Min:{event_data.get('team_size_min', '')}")
+    pdf.drawString(margin, height - 110, f"Expected No. of Participants: {event_data.get('expected_participants', '')} ")
+    pdf.drawString(margin, height - 140, f"Team Size: Min: {event_data.get('team_size_min', '')}")
 
     # pdf.drawString(margin, height - 110, f"Expected No. of Participants: {event_data.get('participants', '')}")
     # pdf.drawString(margin, height - 140, f"Team Size: Min: {event_data.get('teamSizeMin', '')}, Max: {event_data.get('teamSizeMax', '')}")
-    pdf.drawString(margin, height - 170, f"Team Size: Max:{event_data.get('team_size_max', '')}")
+    pdf.drawString(margin, height - 170, f"Team Size: Max: {event_data.get('team_size_max', '')}")
     # Draw a line after participants and team size
     pdf.line(margin - 20, height - 190, width - margin, height - 190)
 
-    pdf.drawString(margin, height - 220, f"Number of Halls/Labs Required:{event_data.get('halls_required', '')} ")
+    pdf.drawString(margin, height - 220, f"Number of Halls/Labs Required: {event_data.get('halls_required', '')} ")
     # pdf.drawString(margin, height - 170, f"Number of Halls/Labs Required: {event_data.get('hallsRequired', '')}")
 
-    pdf.drawString(margin, height - 250, f"Halls/Labs Preferred:{event_data.get('preferred_halls', '')}")
+    pdf.drawString(margin, height - 250, f"Halls/Labs Preferred: {event_data.get('preferred_halls', '')}")
     # pdf.drawString(margin + 20, height - 270, event_data.get("hallsPreferred", ""))
 
-    pdf.drawString(margin, height - 280, f"Reason for Multiple Halls:{event_data.get('hall_reason', '')}")
+    pdf.drawString(margin, height - 280, f"Reason for Multiple Halls: {event_data.get('hall_reason', '')}")
     # pdf.drawString(margin + 20, height - 220, event_data.get("hallReason", ""))
 
     # Draw a line after halls and reasons
@@ -1674,15 +1674,15 @@ def generate_pdf_content_pp(filepath,event_data):
     # Draw a line after the duration radio buttons
     pdf.line(margin - 20, height - 410, width - margin, height - 410)
 
-    pdf.drawString(margin, height - 440, f"Number Required:{event_data.get('extension_boxes', '')}")
+    pdf.drawString(margin, height - 440, f"No of Extension Boxes Required: {event_data.get('extension_boxes', '')}")
     # pdf.drawString(margin, height - 390, f"Number Required: {event_data.get('numberRequired', '')}")
-    pdf.drawString(margin, height - 470, f"Reason for Number:{event_data.get('extension_box_reason', '')}")
+    pdf.drawString(margin, height - 470, f"Reason: {event_data.get('extension_box_reason', '')}")
     # pdf.drawString(margin + 20, height - 440, event_data.get("numberReason", ""))
 
     # Draw a line after number and reason
     pdf.line(margin - 20, height - 500, width - margin, height - 500)
 
-    pdf.drawString(margin, height - 525, f"Extension Box: ")
+    pdf.drawString(margin, height - 525, f"Extension Box: {event_data.get('extension_box', '')} ")
     # pdf.drawString(margin, height - 470, f"Extension Box: {event_data.get('extensionBox', '')}")
 
     # Draw a line after the extension box

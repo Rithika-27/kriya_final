@@ -38,7 +38,7 @@
                         <tr>
                             <th>Round</th>
                             <th>Time</th>
-                            <th>Description</th>
+                            <th class="des">Description</th>
                         </tr>
                     </thead>
                     <tbody id="roundsBody">
@@ -55,18 +55,20 @@
     </div>
 
     <script>
-        // Function to dynamically generate round input fields
+        // Function to generate round input fields dynamically
         function generateRounds() {
             const roundNo = document.getElementById('round_no').value;
             const roundsBody = document.getElementById('roundsBody');
             const roundsSection = document.getElementById('roundsSection');
 
+            // Show or hide the rounds section based on valid input
             if (!roundNo || roundNo <= 0) {
                 roundsBody.innerHTML = ''; // Clear existing rows
                 roundsSection.style.display = 'none';
                 return;
             }
 
+            // Show the section and generate rows
             roundsSection.style.display = 'block';
             roundsBody.innerHTML = ''; // Clear existing rows
 
@@ -81,21 +83,25 @@
             }
         }
 
+        // Listen for changes in the number of rounds field
         document.getElementById('round_no').addEventListener('input', generateRounds);
 
-        // Load saved data from localStorage
+        // Load saved data from localStorage on page load
         function loadFromLocalStorage() {
             const savedData = localStorage.getItem('presentationData');
             if (savedData) {
                 try {
                     const eventDetails = JSON.parse(savedData);
+
+                    // Repopulate the form fields
                     document.getElementById('event_description').value = eventDetails.event_description || '';
                     document.getElementById('topics_and_theme').value = eventDetails.topics_and_theme || '';
                     document.getElementById('event_rules').value = eventDetails.event_rules || '';
 
+                    // Repopulate the number of rounds
                     const rounds = eventDetails.rounds || [];
                     document.getElementById('round_no').value = rounds.length || '';
-                    generateRounds();
+                    generateRounds(); // Generate round fields dynamically
                     rounds.forEach((round, index) => {
                         const roundIndex = index + 1;
                         document.getElementById(`round_${roundIndex}_time`).value = round.time || '';
@@ -105,6 +111,20 @@
                     console.error('Error parsing saved data:', e);
                 }
             }
+        }
+        function formatRules() {
+            const textarea = document.getElementById("event_rules");
+            let rules = textarea.value;
+
+            // Split at each full stop followed by a space or end of input, then join with a newline
+            rules = rules
+                .split(/\. ?/)
+                .map(rule => rule.trim())
+                .filter(rule => rule.length > 0) // Remove any empty entries
+                .join('.\n');
+
+            // Update the textarea with formatted content
+            textarea.value = rules;
         }
 
         // Save data to localStorage
@@ -126,6 +146,7 @@
                 rounds: rounds
             };
 
+            // Save to local storage
             try {
                 localStorage.setItem('presentationData', JSON.stringify(eventDetails));
                 alert('Event details saved successfully!');
@@ -133,9 +154,11 @@
                 alert('Error saving event details to localStorage.');
             }
 
+            // Redirect to preview page
             window.location.href = "/presentation_preview";
         }
 
+        // Call the function on page load
         window.onload = loadFromLocalStorage;
     </script>
 </body>
